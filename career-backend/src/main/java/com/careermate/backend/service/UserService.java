@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.careermate.backend.domain.SkillScore;
 import com.careermate.backend.domain.StudentUser;
 import com.careermate.backend.dto.request.UpdateAvatarRequest;
+import com.careermate.backend.dto.request.UpdateProfileRequest;
 import com.careermate.backend.dto.response.DashboardResponse;
 import com.careermate.backend.dto.response.SkillResponse;
 import com.careermate.backend.dto.response.UserResponse;
@@ -72,6 +73,17 @@ public class UserService {
         }
 
         userMapper.updateAvatar(userId, request.getAvatarFrame(), (sticker == null || sticker.isBlank()) ? null : sticker);
+        return UserResponse.from(userMapper.findById(userId));
+    }
+
+    /** 마이페이지 기본 정보 수정 — name/major/grade/desiredJob only. university/level/EXP stay derived, never client-writable here. */
+    public UserResponse updateProfile(Long userId, UpdateProfileRequest request) {
+        getUserOrThrow(userId); // 404 before a pointless write
+
+        String major = request.getMajor() == null || request.getMajor().isBlank() ? null : request.getMajor().trim();
+        String desiredJob = request.getDesiredJob() == null || request.getDesiredJob().isBlank() ? null : request.getDesiredJob().trim();
+
+        userMapper.updateProfile(userId, request.getName().trim(), major, request.getGrade(), desiredJob);
         return UserResponse.from(userMapper.findById(userId));
     }
 }

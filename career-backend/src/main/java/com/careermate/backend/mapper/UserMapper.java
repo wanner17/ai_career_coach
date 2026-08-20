@@ -28,4 +28,11 @@ public interface UserMapper {
     void updateAvatar(@Param("id") Long id,
                        @Param("avatarFrame") String avatarFrame,
                        @Param("avatarSticker") String avatarSticker);
+
+    /** Backs 마이페이지 기본 정보 수정 — name/major/grade/desiredJob only (university/level/EXP aren't student-editable). */
+    void updateProfile(@Param("id") Long id,
+                        @Param("name") String name,
+                        @Param("major") String major,
+                        @Param("grade") int grade,
+                        @Param("desiredJob") String desiredJob);
 }

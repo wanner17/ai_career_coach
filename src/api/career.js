@@ -13,6 +13,7 @@ export const identify = (payload) => apiPost('/api/auth/identify', payload);
 export const getUser = () => apiGet('/api/career/user/me');
 export const getDashboard = () => apiGet('/api/career/dashboard/me');
 export const updateAvatar = (payload) => apiPut('/api/career/user/me/avatar', payload);
+export const updateProfile = (payload) => apiPut('/api/career/user/me/profile', payload);
 
 export const getQuests = () => apiGet('/api/career/quests');
 export const completeQuest = (questId) => apiPost(`/api/career/quests/${questId}/complete`);

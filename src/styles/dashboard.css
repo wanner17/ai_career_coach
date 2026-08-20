@@ -406,6 +406,18 @@
 .mypage-info-row { display: flex; justify-content: space-between; gap: 12px; }
 .mypage-info-row dt { color: var(--career-muted); }
 .mypage-info-row dd { margin: 0; text-align: right; }
+
+/* 기본 정보 수정 폼 (see pages/MyPage.jsx's ProfileInfoCard) */
+.mypage-edit-btn { border: 1px solid var(--career-line); background: var(--career-card); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: var(--career-primary); cursor: pointer; }
+.mypage-edit-form { display: flex; flex-direction: column; gap: 12px; }
+.mypage-edit-form label { display: block; font-size: 12px; font-weight: 700; color: #45465c; }
+.mypage-edit-form__optional { font-weight: 400; color: var(--career-muted); }
+.mypage-edit-form input, .mypage-edit-form select { display: block; width: 100%; margin-top: 6px; border: 1px solid var(--career-line); border-radius: 9px; padding: 9px 11px; font-size: 13px; font-family: inherit; color: var(--career-text); background: var(--career-card); }
+.mypage-edit-form__error { margin: 0; font-size: 12px; color: #e6534a; }
+.mypage-edit-form__actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 2px; }
+.mypage-edit-form__actions button { border: 1px solid var(--career-line); background: var(--career-card); border-radius: 9px; padding: 9px 16px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.mypage-edit-form__actions button.primary { border: 0; background: var(--career-primary); color: #fff; }
+.mypage-edit-form__actions button:disabled { opacity: .6; cursor: not-allowed; }
 .mypage-badges { margin-top: 14px; }
 .mypage-schedule { margin-top: 14px; }
 @media (max-width: 1023px) {

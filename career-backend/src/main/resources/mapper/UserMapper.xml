@@ -34,4 +34,10 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateProfile">
+        UPDATE careermate_student_user
+        SET name = #{name}, major = #{major}, grade = #{grade}, desired_job = #{desiredJob}
+        WHERE id = #{id}
+    </update>
+
 </mapper>

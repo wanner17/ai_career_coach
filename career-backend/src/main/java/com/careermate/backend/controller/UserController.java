@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.careermate.backend.dto.request.UpdateAvatarRequest;
+import com.careermate.backend.dto.request.UpdateProfileRequest;
 import com.careermate.backend.dto.response.DashboardResponse;
 import com.careermate.backend.dto.response.UserResponse;
 import com.careermate.backend.service.UserService;
@@ -38,5 +39,10 @@ public class UserController {
     @PutMapping("/user/me/avatar")
     public UserResponse updateAvatar(@AuthenticationPrincipal Long userId, @Valid @RequestBody UpdateAvatarRequest request) {
         return userService.updateAvatar(userId, request);
+    }
+
+    @PutMapping("/user/me/profile")
+    public UserResponse updateProfile(@AuthenticationPrincipal Long userId, @Valid @RequestBody UpdateProfileRequest request) {
+        return userService.updateProfile(userId, request);
     }
 }

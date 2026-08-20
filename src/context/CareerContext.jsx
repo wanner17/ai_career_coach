@@ -136,6 +136,14 @@ export function CareerProvider({ children }) {
     }
   }, [quests, pushToast]);
 
+  // 마이페이지 기본 정보 수정 — throws (doesn't swallow) so the form itself
+  // can stay open and show the real error instead of silently failing.
+  const updateProfile = useCallback(async (payload) => {
+    const updated = await api.updateProfile(payload);
+    setUser(updated);
+    pushToast('✅ 기본 정보를 저장했어요.');
+  }, [pushToast]);
+
   const requestCompleteQuest = useCallback((quest) => setConfirmQuest(quest), []);
   const cancelCompleteQuest = useCallback(() => setConfirmQuest(null), []);
   const confirmCompleteQuest = useCallback(() => {
@@ -165,6 +173,7 @@ export function CareerProvider({ children }) {
     toasts, pushToast, bumpSkill,
     confirmQuest, requestCompleteQuest, cancelCompleteQuest, confirmCompleteQuest,
     levelUpInfo, dismissLevelUp,
+    updateProfile,
     logout,
   };
 
