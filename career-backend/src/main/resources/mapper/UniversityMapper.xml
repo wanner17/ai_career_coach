@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.careermate.backend.mapper.UniversityMapper">
+
+    <resultMap id="UniversityMap" type="com.careermate.backend.domain.University">
+        <id property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="primaryColor" column="primary_color"/>
+        <result property="primaryColorHover" column="primary_color_hover"/>
+        <result property="primaryColorLight" column="primary_color_light"/>
+        <result property="primaryColorSoft" column="primary_color_soft"/>
+        <result property="primaryColor2" column="primary_color2"/>
+        <result property="primaryColorShadow" column="primary_color_shadow"/>
+        <result property="logoUrl" column="logo_url"/>
+    </resultMap>
+
+    <select id="findByCode" resultMap="UniversityMap">
+        SELECT * FROM careermate_university WHERE code = #{code}
+    </select>
+
+    <update id="update">
+        UPDATE careermate_university
+        SET name = #{name}, primary_color = #{primaryColor}, primary_color_hover = #{primaryColorHover},
+            primary_color_light = #{primaryColorLight}, primary_color_soft = #{primaryColorSoft},
+            primary_color2 = #{primaryColor2}, primary_color_shadow = #{primaryColorShadow}, logo_url = #{logoUrl}
+        WHERE code = #{code}
+    </update>
+
+</mapper>

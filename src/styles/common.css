@@ -1,0 +1,74 @@
+* { box-sizing: border-box; }
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  background: var(--career-bg);
+  color: var(--career-text);
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+}
+button, input, textarea { font: inherit; }
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; }
+
+/* ---- Common: Modal ---- */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(23, 23, 43, 0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 16px;
+  animation: overlay-in 0.18s ease-out;
+}
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+.modal-box {
+  background: #fff; border-radius: 18px; padding: 28px;
+  width: 100%; max-width: 380px; box-shadow: 0 24px 60px rgba(30, 20, 70, 0.25);
+  animation: modal-in 0.22s cubic-bezier(.34,1.56,.64,1);
+  text-align: center;
+}
+@keyframes modal-in { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.modal-box:focus { outline: none; }
+.modal-box h3 { margin: 0 0 12px; font-size: 17px; }
+.modal-box p { margin: 0 0 20px; color: var(--career-muted); font-size: 13px; line-height: 1.6; }
+.modal-actions { display: flex; gap: 10px; justify-content: center; }
+.modal-actions button { flex: 1; border-radius: 10px; padding: 12px; font-weight: 700; font-size: 13px; border: 1px solid var(--career-line); background: #fff; }
+.modal-actions button.primary { border: 0; background: var(--career-primary); color: #fff; }
+
+/* ---- Common: Level Up Modal ---- */
+.levelup-box { max-width: 340px; padding: 32px 24px; position: relative; overflow: hidden; }
+.levelup-box .levelup-emoji { font-size: 42px; margin-bottom: 6px; }
+.levelup-box h3 { font-size: 20px; color: var(--career-primary); margin-bottom: 4px; }
+.levelup-box .levelup-transition { font-size: 26px; font-weight: 800; margin: 14px 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.levelup-box .levelup-transition span.arrow { color: var(--career-primary); }
+.levelup-box button { margin-top: 20px; width: 100%; border: 0; background: var(--career-primary); color: #fff; border-radius: 10px; padding: 13px; font-weight: 700; }
+
+/* ---- Common: Toast ---- */
+.toast-stack { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1200; }
+.toast { background: #1f1a3d; color: #fff; padding: 13px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 28px rgba(0,0,0,.25); animation: toast-in 0.25s ease-out; display: flex; align-items: center; gap: 8px; }
+.toast b { color: #b9a4ff; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ---- Common: CareerProvider loading/error gate ---- */
+.career-status-screen { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; background: var(--career-bg); padding: 24px; }
+.career-status-box { text-align: center; color: var(--career-muted); font-size: 14px; max-width: 320px; }
+.career-status-box.is-error { color: var(--career-text); }
+.career-status-spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--career-primary-light); border-top-color: var(--career-primary); margin: 0 auto 14px; animation: career-status-spin 0.8s linear infinite; }
+@keyframes career-status-spin { to { transform: rotate(360deg); } }
+.career-status-retry { margin-top: 14px; border: 0; background: var(--career-primary); color: #fff; border-radius: 10px; padding: 10px 18px; font-weight: 700; font-size: 13px; }
+
+/* ---- Identify form (dev/direct-access fallback — see CareerContext.jsx) ---- */
+.identify-box { background: #fff; border: 1px solid var(--career-line); border-radius: 16px; box-shadow: var(--career-shadow); padding: 28px 26px; width: 100%; max-width: 340px; text-align: center; }
+.identify-box h2 { margin: 0 0 8px; font-size: 17px; }
+.identify-box p { margin: 0 0 18px; color: var(--career-muted); font-size: 12px; line-height: 1.6; }
+.identify-box label { display: block; text-align: left; font-size: 12px; font-weight: 700; margin-bottom: 12px; color: #45465c; }
+.identify-box__optional { font-weight: 400; color: var(--career-muted); }
+.identify-box input { width: 100%; margin-top: 6px; border: 1px solid var(--career-line); border-radius: 9px; padding: 10px 12px; font-size: 13px; }
+.identify-box button { width: 100%; margin-top: 4px; border: 0; background: var(--career-primary); color: #fff; border-radius: 10px; padding: 12px; font-weight: 700; font-size: 13px; }
+.identify-box button:disabled { opacity: .5; }
+
+/* ---- Common: ProgressBar (shared shape for level bar + skill bars) ---- */
+.progress, .mini-progress { height: 8px; background: #eeeef4; border-radius: 99px; overflow: hidden; }
+.progress i, .mini-progress i {
+  display: block; height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, var(--career-primary), var(--career-primary-2));
+  transition: width 0.6s cubic-bezier(.22,.9,.32,1);
+}
+.mini-progress { height: 7px; }

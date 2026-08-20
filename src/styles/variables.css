@@ -1,0 +1,22 @@
+/* Primary vars are overwritten per-university at runtime (see ThemeContext). */
+:root {
+  --career-primary: #7053f6;
+  --career-primary-hover: #6044e6;
+  --career-primary-light: #f3efff;
+  --career-primary-soft: #f8f6ff;
+  --career-primary-2: #8e71ff;
+  --career-primary-shadow: rgba(112, 83, 246, .24);
+  --career-primary-gradient: linear-gradient(135deg, var(--career-primary), var(--career-primary-2));
+
+  --career-text: #17172b;
+  --career-muted: #76778b;
+  --career-line: #ebeaf3;
+  --career-card: #ffffff;
+  --career-bg: #f7f7fb;
+
+  --career-green: #22c58b;
+  --career-blue: #3796f6;
+  --career-orange: #ff8b32;
+  --career-yellow: #f3ad19;
+  --career-shadow: 0 12px 30px rgba(69, 56, 120, 0.08);
+}

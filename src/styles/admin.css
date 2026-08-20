@@ -1,0 +1,100 @@
+.admin-main { padding: 24px; min-width: 0; }
+.admin-hamburger { margin-bottom: 14px; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+.admin-header h1 { margin: 0; font-size: 22px; }
+.admin-header p { margin: 6px 0 0; color: var(--career-muted); font-size: 13px; }
+.btn-primary { border: 0; background: var(--career-primary); color: #fff; border-radius: 10px; padding: 11px 18px; font-weight: 700; font-size: 13px; }
+
+.admin-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.admin-toolbar input, .admin-toolbar select { border: 1px solid var(--career-line); border-radius: 9px; padding: 10px 12px; font-size: 13px; background: #fff; }
+.admin-toolbar input { flex: 1; min-width: 180px; }
+
+.admin-table-wrap { background: #fff; border: 1px solid var(--career-line); border-radius: 14px; box-shadow: var(--career-shadow); overflow-x: auto; }
+table.admin-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 720px; }
+.admin-table th { text-align: left; padding: 14px 16px; background: #faf9fe; color: var(--career-muted); font-weight: 700; font-size: 11px; border-bottom: 1px solid var(--career-line); white-space: nowrap; }
+.admin-table td { padding: 14px 16px; border-bottom: 1px solid var(--career-line); vertical-align: middle; }
+.admin-table tr:last-child td { border-bottom: 0; }
+.status-pill { display: inline-block; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.status-pill.on { background: #e5f7f0; color: #19a878; }
+.status-pill.off { background: #f1f1f6; color: #8b8c9c; }
+.admin-row-actions { display: flex; gap: 6px; }
+.admin-row-actions button { border: 1px solid var(--career-line); background: #fff; border-radius: 7px; padding: 6px 10px; font-size: 11px; }
+.admin-row-actions button.danger { color: #e6534a; border-color: #f4d2ce; }
+.admin-empty { padding: 40px; text-align: center; color: var(--career-muted); font-size: 13px; }
+
+.admin-modal-box { max-width: 480px; text-align: left; }
+.admin-modal-box h3 { margin-bottom: 18px; }
+.admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+.admin-form-grid .full { grid-column: 1 / -1; }
+.admin-form-grid label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #45465c; }
+.admin-form-grid input, .admin-form-grid select, .admin-form-grid textarea { width: 100%; border: 1px solid var(--career-line); border-radius: 9px; padding: 9px 11px; font-size: 13px; }
+.admin-form-grid textarea { resize: vertical; min-height: 60px; }
+
+@media (max-width: 767px) {
+  .admin-form-grid { grid-template-columns: 1fr; }
+}
+
+/* Nav placeholders still awaiting a real screen (see AdminLayout.jsx) — same
+   idea as the student Sidebar's "준비 중" items, just dimmer instead of a badge. */
+.career-nav__item.is-soon { opacity: .55; }
+
+/* 학생관리 — compact per-axis score chips inside a table cell. */
+.admin-skill-chips { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; color: var(--career-muted); }
+.admin-skill-chips span { white-space: nowrap; }
+
+/* 통계 — summary tiles + reuses .skill-card/.skill-row (능력치) and
+   .ai-insights/.ai-insights__list (AI상담 주제) from dashboard.css so the
+   same "graded axis" and "topic bar" visuals read as one system everywhere
+   they appear, not a third bar style invented just for this screen. */
+.admin-stats-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.admin-stat-tile { background: #fff; border: 1px solid var(--career-line); border-radius: 14px; padding: 18px 20px; box-shadow: var(--career-shadow); }
+.admin-stat-tile span { display: block; font-size: 12px; color: var(--career-muted); margin-bottom: 6px; }
+.admin-stat-tile strong { font-size: 24px; }
+
+.admin-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; align-items: start; }
+@media (max-width: 1023px) {
+  .admin-stats-grid { grid-template-columns: 1fr; }
+}
+
+.admin-quest-stat-card { padding-bottom: 8px; }
+.admin-quest-bars { list-style: none; margin: 0; padding: 6px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+.admin-quest-bars li { display: grid; grid-template-columns: minmax(140px, 260px) 1fr 70px; align-items: center; gap: 12px; font-size: 12.5px; }
+.admin-quest-bars__label { color: var(--career-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-quest-bars__bar { height: 8px; border-radius: 999px; background: var(--career-line); overflow: hidden; }
+.admin-quest-bars__bar span { display: block; height: 100%; background: var(--career-primary-gradient); border-radius: 999px; }
+.admin-quest-bars__count { text-align: right; font-weight: 700; color: var(--career-primary); white-space: nowrap; }
+
+/* Dashboard — 최근 활동 피드 + 바로가기 (see AdminDashboard.jsx). */
+.admin-activity-card { padding-bottom: 6px; }
+.admin-activity-list { list-style: none; margin: 0; padding: 6px 20px 18px; display: flex; flex-direction: column; gap: 4px; }
+.admin-activity-list li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; border-top: 1px solid var(--career-line); font-size: 12.5px; }
+.admin-activity-list li:first-child { border-top: 0; }
+.admin-activity-list__main { color: var(--career-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-activity-list__main small { color: var(--career-muted); font-weight: 400; }
+.admin-activity-list__side { color: var(--career-muted); white-space: nowrap; font-weight: 600; }
+
+.admin-shortcut-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+.admin-shortcut-card { text-align: left; background: #fff; border: 1px solid var(--career-line); border-radius: 14px; padding: 18px 20px; box-shadow: var(--career-shadow); display: flex; flex-direction: column; gap: 6px; cursor: pointer; }
+.admin-shortcut-card:hover { border-color: var(--career-primary); }
+.admin-shortcut-card__icon { font-size: 20px; }
+.admin-shortcut-card strong { font-size: 14px; }
+.admin-shortcut-card__desc { font-size: 12px; color: var(--career-muted); line-height: 1.5; }
+
+/* 설정 — see AdminSettings.jsx */
+.admin-settings-card { max-width: 560px; padding: 22px 24px; }
+.admin-settings__hint { font-weight: 400; color: var(--career-muted); }
+.admin-color-picker { display: flex; gap: 10px; align-items: center; }
+.admin-color-picker input[type="color"] { width: 44px; height: 40px; padding: 2px; border: 1px solid var(--career-line); border-radius: 9px; background: #fff; cursor: pointer; }
+.admin-color-picker input:not([type="color"]) { flex: 1; }
+.admin-settings__error { margin: 6px 0 0; font-size: 12px; color: #e6534a; }
+.admin-settings__saved { margin: 4px 0 18px; padding: 12px 14px; background: #e5f7f0; color: #19a878; border-radius: 10px; font-size: 12.5px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.admin-settings__saved button { border: 1px solid #19a878; background: #fff; color: #19a878; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.admin-settings__actions { justify-content: flex-end; }
+.admin-settings__actions button { flex: none; padding: 11px 22px; }
+
+.admin-theme-preview { margin: 4px 0 18px; padding: 16px; border: 1px solid var(--career-line); border-radius: 12px; background: #faf9fe; }
+.admin-theme-preview__label { display: block; font-size: 12px; font-weight: 700; color: var(--career-muted); margin-bottom: 10px; }
+.admin-theme-preview__swatches { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.admin-swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; color: var(--career-muted); }
+.admin-swatch__chip { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--career-line); }
+.admin-theme-preview__button { border: 0; color: #fff; font-weight: 700; font-size: 13px; border-radius: 10px; padding: 11px 20px; cursor: default; }

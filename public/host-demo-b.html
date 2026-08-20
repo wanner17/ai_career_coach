@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>B대학교 | 홈페이지 (Embed Demo)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, 'Segoe UI', 'Noto Sans KR', sans-serif; color: #202033; background: #fff; }
+  header { background: #0d3d75; color: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  header .brand { font-weight: 800; font-size: 18px; }
+  header nav { display: flex; gap: 22px; font-size: 13px; }
+  header nav a { color: #cfe0f5; }
+  .hero { background: linear-gradient(135deg, #0d3d75, #1565c0); color: #fff; padding: 70px 32px; text-align: center; }
+  .hero h1 { margin: 0 0 12px; font-size: 30px; }
+  .hero p { margin: 0; color: #dceafc; }
+  .content { max-width: 960px; margin: 0 auto; padding: 48px 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .content .box { border: 1px solid #eceaf5; border-radius: 14px; padding: 22px; }
+  .content .box h3 { margin: 0 0 8px; font-size: 15px; }
+  .content .box p { margin: 0; font-size: 13px; color: #6a6b80; line-height: 1.6; }
+  footer { padding: 24px; text-align: center; color: #9a9bb0; font-size: 12px; }
+  .switch-university { position: fixed; left: 16px; bottom: 16px; background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 8px 12px; font-size: 12px; z-index: 500; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">🎓 B대학교</div>
+    <nav>
+      <a href="#">대학소개</a><a href="#">입학안내</a><a href="#">학사정보</a><a href="#">취업지원</a><a href="#">커뮤니티</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>B대학교 홈페이지 (더미)</h1>
+    <p>같은 career-embed.js로 대학만 바꿔 적용한 예시입니다 (Primary Color: Blue).</p>
+  </section>
+
+  <section class="content">
+    <div class="box"><h3>학사공지</h3><p>2026학년도 2학기 수강신청 일정이 안내되었습니다.</p></div>
+    <div class="box"><h3>취업지원센터</h3><p>현직자 직무특강 및 AI 모의면접 프로그램을 상시 운영합니다.</p></div>
+    <div class="box"><h3>장학안내</h3><p>2026년 2학기 국가장학금 신청 기간을 확인하세요.</p></div>
+  </section>
+
+  <footer>이 페이지는 career-embed.js 데모용 더미 홈페이지입니다.</footer>
+
+  <div class="switch-university">
+    데모 대학: <a href="/host-demo.html">샘플대학교</a> ·
+    <a href="/host-demo-b.html">B대학교</a>
+  </div>
+
+  <script src="/career-embed.js"></script>
+  <script>
+    // Matches UNIVERSITY_B in src/config/universities.js — Floating Button and
+    // the iframe content should read as the same Blue-themed service.
+    // No seeded student for UNIVERSITY_B — first load auto-provisions a fresh
+    // Lv.1 student for this externalUserId, demonstrating the "new student"
+    // side of the identify-or-provision flow (see AuthService).
+    CareerMate.init({
+      university: 'UNIVERSITY_B',
+      label: 'AI 커리어 코치',
+      primaryColor: '#1565C0',
+      primaryHoverColor: '#0D47A1',
+      externalUserId: 'b-20240001',
+      studentName: '이미래',
+    });
+  </script>
+</body>
+</html>

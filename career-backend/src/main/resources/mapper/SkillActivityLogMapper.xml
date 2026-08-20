@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.careermate.backend.mapper.SkillActivityLogMapper">
+
+    <insert id="tryInsert">
+        INSERT IGNORE INTO careermate_skill_activity_log (user_id, skill, activity_key, points)
+        VALUES (#{userId}, #{skill}, #{activityKey}, #{points})
+    </insert>
+
+</mapper>

@@ -1,0 +1,54 @@
+# Default profile targets MariaDB, per the project's target stack.
+# Create the DB first: CREATE DATABASE career_db CHARACTER SET utf8mb4;
+# schema.sql/data.sql run automatically on startup (sql.init.mode: always) —
+# convenient for this MVP-backend stage; switch to Flyway/Liquibase once the
+# schema needs real migrations instead of a single seed script.
+server:
+  port: 8080
+
+spring:
+  application:
+    name: career-backend
+  datasource:
+    # Env vars let the same file serve plain `mvn spring-boot:run` (defaults
+    # below = localhost) and docker-compose (which sets DB_HOST=mariadb, the
+    # service name) without a separate profile just for that one difference.
+    url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:career_db}?useUnicode=true&characterEncoding=utf8
+    username: ${DB_USER:career_app}
+    password: ${DB_PASSWORD:career_app}
+    driver-class-name: org.mariadb.jdbc.Driver
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+  mvc:
+    problemdetails:
+      enabled: true
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+career-mate:
+  # Comma-separated list — CORS origins allowed to call this API (the Vite
+  # dev server by default; add the real university domain(s) before go-live).
+  # 192.168.0.31 = this machine's LAN IP, for testing from another device on
+  # the same network (`npm run dev -- --host`) — not needed once real domains replace it.
+  allowed-origins: http://localhost:5173,http://192.168.0.31:5173
+  jwt:
+    # Dev-only default (still >=256 bits for HS256) — override with a real
+    # secret via JWT_SECRET before this ever runs anywhere but a laptop.
+    secret: ${JWT_SECRET:dev-only-secret-change-before-deploying-this-anywhere-real-0000}
+    expiration-days: 7
+  worknet:
+    # work24.go.kr Open API key — ported from the existing worknet integration
+    # (see WorknetService). Override via WORKNET_AUTH_KEY once this leaves dev;
+    # the default below is the key already in use in that other project.
+    auth-key: ${WORKNET_AUTH_KEY:5a5d4916-0d18-410b-971c-7b5ea5c46653}
+  openai:
+    # No default on purpose (unlike worknet's key above) — this one's the
+    # user's own OpenAI account. EssayReviewService returns a clear 503
+    # instead of a raw crash when it's blank. Set OPENAI_API_KEY in .env.
+    api-key: ${OPENAI_API_KEY:}
+    model: ${OPENAI_MODEL:gpt-4o-mini}

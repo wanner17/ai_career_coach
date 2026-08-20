@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.careermate.backend.mapper.EssayReviewMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO careermate_essay_review
+            (user_id, question, content, target_type, target_label, target_context,
+             overall_score, summary, categories_json, suggestions_json, rewritten_example)
+        VALUES
+            (#{userId}, #{question}, #{content}, #{targetType}, #{targetLabel}, #{targetContext},
+             #{overallScore}, #{summary}, #{categoriesJson}, #{suggestionsJson}, #{rewrittenExample})
+    </insert>
+
+    <select id="findAllForUser" resultType="com.careermate.backend.domain.EssayReviewRecord">
+        SELECT * FROM careermate_essay_review
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

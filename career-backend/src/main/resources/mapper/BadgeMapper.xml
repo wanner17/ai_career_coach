@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.careermate.backend.mapper.BadgeMapper">
+
+    <select id="findAllForUser" resultType="com.careermate.backend.domain.Badge">
+        SELECT b.*, (ub.user_id IS NOT NULL) AS earned
+        FROM careermate_badge b
+        LEFT JOIN careermate_user_badge ub ON ub.badge_id = b.id AND ub.user_id = #{userId}
+        ORDER BY b.id
+    </select>
+
+    <select id="findAllCatalog" resultType="com.careermate.backend.domain.Badge">
+        SELECT * FROM careermate_badge ORDER BY id
+    </select>
+
+    <select id="findById" resultType="com.careermate.backend.domain.Badge">
+        SELECT * FROM careermate_badge WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO careermate_badge (name, unlock_type, unlock_value, icon, medal_class)
+        VALUES (#{name}, #{unlockType}, #{unlockValue}, #{icon}, #{medalClass})
+    </insert>
+
+    <update id="update">
+        UPDATE careermate_badge
+        SET name = #{name}, unlock_type = #{unlockType}, unlock_value = #{unlockValue},
+            icon = #{icon}, medal_class = #{medalClass}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM careermate_badge WHERE id = #{id}
+    </delete>
+
+</mapper>

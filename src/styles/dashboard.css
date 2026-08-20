@@ -1,0 +1,485 @@
+/* Ported from the approved static mockup — layout/spacing/visuals kept as-is.
+   Colors now route through CSS vars (career-*) so university theming works. */
+
+.career-app {
+  min-height: 100vh;
+  display: grid;
+  /* Desktop breakpoint is 1024px (see responsive.css) — these tracks must fit
+     comfortably at 1024 or the main column min-width forces horizontal scroll
+     the moment a 1024-wide iframe opens (the 1st-pass bug: 225+680+325=1230 > 1200). */
+  grid-template-columns: 210px minmax(420px, 1fr) 300px;
+  background: linear-gradient(180deg, #fafafe 0%, #f6f5fb 100%);
+}
+.career-app.no-ai-panel { grid-template-columns: 210px 1fr; }
+
+.career-sidebar { background: #fff; border-right: 1px solid var(--career-line); padding: 24px 16px; display: flex; flex-direction: column; gap: 22px; position: sticky; top: 0; height: 100vh; height: 100dvh; overflow-y: auto; }
+.career-brand { display: flex; gap: 11px; align-items: flex-start; padding: 0 8px; }
+.career-brand__icon { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; }
+.career-brand__icon-fallback { font-size: 30px; color: var(--career-primary); line-height: 1; }
+.career-brand strong { font-size: 20px; } .career-brand p { margin: 4px 0 0; color: var(--career-muted); font-size: 11px; }
+.career-nav { display: flex; flex-direction: column; gap: 7px; }
+.career-nav__item { padding: 13px 14px; border-radius: 9px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 12px; color: #292944; border: 0; background: none; width: 100%; text-align: left; }
+.career-nav__item span { width: 20px; text-align: center; font-size: 18px; }
+.career-nav__item:hover { background: var(--career-primary-soft); }
+.career-nav__item.is-active { background: linear-gradient(135deg, var(--career-primary), var(--career-primary-2)); color: #fff; box-shadow: 0 8px 18px var(--career-primary-shadow); }
+.weekly-quest { margin-top: auto; background: linear-gradient(145deg, var(--career-primary-light), var(--career-primary-soft)); border: 1px solid var(--career-primary-light); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 9px; position: relative; overflow: hidden; }
+.weekly-quest__eyebrow { font-size: 12px; color: var(--career-primary-hover); } .weekly-quest strong { font-size: 13px; } .weekly-quest b { font-size: 12px; color: var(--career-primary); }
+.weekly-quest .gift { font-size: 36px; position: absolute; right: 14px; bottom: 42px; }
+.weekly-quest button { margin-top: 26px; border: 0; background: var(--career-primary); color: #fff; border-radius: 7px; padding: 9px; font-weight: 700; }
+.profile-box { border: 1px solid var(--career-line); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 10px; }
+.profile-avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--career-primary-light); overflow: hidden; border: 1px solid #e4ddff; }
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-box strong { font-size: 13px; } .profile-box p { margin: 3px 0 0; color: var(--career-muted); font-size: 11px; }
+.profile-box__logout { margin-left: auto; width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--career-line); background: #fff; color: var(--career-muted); font-size: 13px; flex-shrink: 0; }
+.profile-box__logout:hover { color: #e6534a; border-color: #f4d2ce; }
+
+.career-main { padding: 24px; min-width: 0; }
+.career-header { min-height: 76px; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.career-header__title-row { display: flex; gap: 12px; align-items: flex-start; }
+.career-header h1 { margin: 0; font-size: 24px; } .career-header p { margin: 8px 0 0; color: #4d5570; font-size: 13px; }
+.career-header__actions { display: flex; gap: 10px; align-items: center; }
+.icon-btn, .ghost-btn { height: 38px; border: 1px solid #deddea; background: #fff; border-radius: 10px; }
+.icon-btn { width: 40px; position: relative; } .ghost-btn { padding: 0 15px; font-size: 12px; }
+.badge-dot { position: absolute; right: -3px; top: -6px; background: #ff4e4e; color: #fff; border-radius: 999px; min-width: 18px; height: 18px; display: grid; place-items: center; font-size: 10px; border: 2px solid #fff; }
+
+.top-grid { display: grid; grid-template-columns: 1.05fr 1.15fr 1.3fr; gap: 14px; }
+.middle-grid { display: grid; grid-template-columns: 1fr 1.25fr .95fr; gap: 14px; margin-top: 14px; }
+/* Dashboard's own layout: two equal-width cards per row (avatar+skills, then
+   quest+badges) — roomier than the old 3-up grid, matches the original design
+   reference instead of cramming everything into one row. */
+.dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; align-items: start; }
+.card { background: var(--career-card); border: 1px solid var(--career-line); border-radius: 14px; box-shadow: var(--career-shadow); overflow: hidden; }
+.card-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--career-line); }
+.card-head h2 { font-size: 17px; margin: 0; } .card-head a { font-size: 12px; color: var(--career-primary); }
+
+.avatar-card { padding: 0 16px 20px; display: flex; flex-direction: column; align-items: center; background: linear-gradient(180deg, var(--career-primary-light) 0, #fff 64%); }
+.avatar-card .avatar-stage { width: 100%; height: 360px; margin-bottom: 14px; }
+@keyframes avatar-pulse { 0% { transform: scale(1); } 40% { transform: scale(1.06); } 100% { transform: scale(1); } }
+
+/* ---- Evolution avatar, contain mode (see components/avatar/EvolutionAvatar.jsx) ----
+   Used where the avatar sits alongside other content at a small fixed size
+   (Sidebar profile thumbnail, Level Up modal's before/after comparison) —
+   shrinks to fit, never stretched. The bigger "hero" placements (Dashboard,
+   AvatarCard, 나의 성장 preview) use the `fill` prop's full-bleed
+   `.avatar-stage` treatment instead (below). */
+.evolution-avatar { width: 100%; height: 100%; display: grid; place-items: center; }
+.evolution-avatar img { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* One-shot evolution moment (Level Up modal) — fade + scale + glow, CSS only. */
+.avatar-evolve img { animation: avatar-evolve-in .7s cubic-bezier(.22,.9,.32,1); }
+@keyframes avatar-evolve-in {
+  0% { opacity: 0; transform: scale(.88); filter: drop-shadow(0 0 0 rgba(154,107,239,0)); }
+  60% { transform: scale(1.05); filter: drop-shadow(0 0 22px rgba(154,107,239,.55)); }
+  100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 0 rgba(154,107,239,0)); }
+}
+
+/* Next-evolution hint on the Avatar Card / 나의 성장 preview. */
+.next-evolution { width: 100%; margin-top: 14px; padding: 12px; border-radius: 12px; background: var(--career-primary-light); text-align: center; }
+.next-evolution__label { display: block; font-size: 11px; color: var(--career-primary-hover); font-weight: 700; }
+.next-evolution strong { display: block; margin-top: 4px; font-size: 14px; color: var(--career-primary); }
+.next-evolution__remaining { display: block; margin-top: 3px; font-size: 11px; color: var(--career-muted); }
+.next-evolution--maxed { background: linear-gradient(135deg, var(--career-primary-soft), var(--career-primary-light)); font-weight: 700; color: var(--career-primary); font-size: 13px; }
+
+/* ---- 나의 성장 page (see pages/GrowthPage.jsx) ----
+   Left: avatar + level + next-evolution + gender toggle. Right: 7-stage
+   journey list. Replaces the old dress-up customize page entirely — no
+   tabs, no item grid, nothing to equip or save. */
+.growth-page-grid { display: grid; grid-template-columns: 380px 1fr; gap: 18px; align-items: start; }
+.avatar-page-preview { position: sticky; top: 24px; padding: 20px 16px 22px; display: flex; flex-direction: column; align-items: center; background: linear-gradient(180deg, var(--career-primary-light) 0, #fff 64%); }
+.avatar-page-preview .avatar-stage { width: 100%; height: 400px; margin-bottom: 14px; }
+.avatar-page-preview .level-box { margin-top: 6px; }
+.avatar-page-hint { margin: 0; padding: 0 0 8px; font-size: 12px; color: var(--career-muted); }
+.gender-toggle { width: 100%; margin-top: 16px; text-align: center; }
+.gender-toggle__buttons { display: flex; gap: 8px; margin-top: 8px; }
+.gender-toggle__buttons button { flex: 1; border: 1px solid var(--career-line); background: #fff; border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 700; color: var(--career-text); }
+.gender-toggle__buttons button.is-active { background: var(--career-primary); border-color: var(--career-primary); color: #fff; }
+
+.growth-journey { padding-bottom: 8px; }
+.journey-list { list-style: none; margin: 0; padding: 8px 20px 20px; display: flex; flex-direction: column; gap: 4px; }
+.journey-item { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--career-line); }
+.journey-item:last-child { border-bottom: 0; }
+.journey-item__dot { font-size: 14px; width: 20px; text-align: center; color: var(--career-primary); }
+.journey-item.is-locked .journey-item__dot { color: var(--career-muted); }
+.journey-item__body { flex: 1; display: flex; flex-direction: column; }
+.journey-item__body strong { font-size: 14px; }
+.journey-item__body span { font-size: 11px; color: var(--career-muted); margin-top: 2px; }
+.journey-item.is-locked .journey-item__body strong { color: var(--career-muted); }
+.journey-item.is-current { background: var(--career-primary-light); border-radius: 10px; }
+.journey-item__current { font-size: 11px; font-weight: 700; color: var(--career-primary); background: #fff; border-radius: 99px; padding: 4px 10px; }
+@media (max-width: 1023px) {
+  .growth-page-grid { grid-template-columns: 1fr; }
+  .avatar-page-preview { position: static; }
+}
+
+/* 능력치 상세 (see GrowthPage.jsx's SkillDetailCard) — spans both columns,
+   listing the actual quests wired to each axis via careermate_quest's
+   skill_target/skill_points instead of a generic static tips list. */
+.skill-detail-card { padding: 8px 20px 18px; }
+.skill-detail-row { padding: 16px 0; border-top: 1px solid var(--career-line); }
+.skill-detail-row:first-child { border-top: 0; }
+.skill-detail-row__head { display: grid; grid-template-columns: 34px 100px 1fr 34px; align-items: center; gap: 10px; }
+.skill-detail-row__head strong { font-size: 14px; text-align: right; }
+.skill-detail-row__growth { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 10px 0 0 44px; }
+.skill-detail-row__growth span { font-size: 12px; color: var(--career-muted); }
+.skill-detail-row__growth button { flex: none; border: 0; background: none; color: var(--career-primary); font-weight: 700; font-size: 12px; cursor: pointer; padding: 0; white-space: nowrap; }
+
+/* ---- Level Up modal — avatar evolution variant (see LevelUpModal.jsx) ---- */
+.levelup-box--evolution { max-width: 380px; }
+.evolution-compare { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 14px 0; }
+.evolution-compare__side { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 110px; }
+.evolution-compare__side .evolution-avatar { width: auto; height: 140px; display: inline-block; }
+.evolution-compare__side .evolution-avatar img { width: auto; height: 100%; }
+.evolution-compare__side span { font-size: 12px; font-weight: 700; color: var(--career-muted); }
+.evolution-compare__arrow { font-size: 20px; color: var(--career-primary); }
+
+/* Flows as part of the same card now, not a floating overlap box. */
+.level-box { width: 100%; text-align: center; }
+.level-box__label { font-size: 12px; color: var(--career-muted); font-weight: 600; }
+.level-box strong { display: block; color: var(--career-primary); font-size: 32px; margin-top: 6px; }
+.level-box p { margin: 2px 0 14px; font-size: 13px; color: var(--career-muted); }
+.level-box small { display: block; margin-top: 8px; color: #4b4c61; font-size: 12px; }
+
+.skill-list { padding: 18px 20px; }
+.skill-row { display: grid; grid-template-columns: 34px 90px 1fr 34px; align-items: center; gap: 10px; padding: 12px 0; }
+.skill-row b { font-size: 14px; } .skill-row strong { font-size: 14px; text-align: right; }
+.skill-icon { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 14px; }
+.skill-icon.green { background: #dff8ef; } .skill-icon.blue { background: #e2f0ff; } .skill-icon.orange { background: #fff0df; } .skill-icon.purple { background: var(--career-primary-light); } .skill-icon.yellow { background: #fff4d8; }
+.bluebar i { background: var(--career-blue); } .orangebar i { background: var(--career-orange); } .purplebar i { background: #9a6bef; } .yellowbar i { background: var(--career-yellow); }
+
+/* ---- Dashboard hero card (see career/ProfileSummaryCard.jsx) ----
+   Avatar + Career Level + 능력치 in one wide card. The avatar side is a
+   full-bleed "stage", not a small photo-card nested inside a bigger panel:
+   the image itself fills `.avatar-stage` edge to edge via object-fit:cover
+   (+ a slight object-position/scale bias toward the face), so there's only
+   ever ONE frame, not a frame-within-a-frame. Finished per-stage art, so
+   nothing here does part-by-part positioning. */
+.hero { max-width: 1240px; display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 26px; padding: 24px; margin-bottom: 16px; background: var(--career-card); border: 1px solid var(--career-line); border-radius: 22px; box-shadow: var(--career-shadow); }
+.avatar-side { display: flex; flex-direction: column; min-width: 0; }
+.avatar-stage { position: relative; height: 460px; overflow: hidden; border-radius: 22px; background: linear-gradient(160deg, var(--career-primary-light), #cdbaf4); box-shadow: 0 18px 34px rgba(101, 70, 190, .16); transition: transform .4s ease; }
+.avatar-stage.pulse { animation: avatar-pulse .5s ease; }
+.avatar-stage-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; object-position: center 20%; transform: scale(1.12); transform-origin: center 18%; }
+.avatar-stage-img.avatar-evolve { animation: avatar-evolve-in .7s cubic-bezier(.22,.9,.32,1); }
+.avatar-stage::after { content: ''; position: absolute; inset: auto 0 0; height: 32%; background: linear-gradient(to top, rgba(72, 43, 139, .24), transparent); pointer-events: none; }
+.avatar-badge { position: absolute; left: 18px; bottom: 17px; z-index: 2; padding: 9px 13px; border-radius: 999px; background: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.75); backdrop-filter: blur(10px); font-size: 13px; font-weight: 900; color: var(--career-primary); box-shadow: 0 6px 20px rgba(48,31,105,.12); }
+.evolution-box { margin-top: 16px; border-radius: 16px; padding: 14px 16px; text-align: center; background: var(--career-primary-light); color: var(--career-primary-hover); font-size: 13px; line-height: 1.6; }
+.evolution-box strong { display: block; font-size: 15px; }
+.evolution-box--maxed { font-weight: 700; color: var(--career-primary); }
+
+.detail { min-width: 0; padding: 2px 0 0; }
+.level-kicker { font-size: 13px; color: var(--career-muted); margin-bottom: 7px; }
+.level-line { display: flex; align-items: flex-end; gap: 12px; }
+.level-line .level { font-size: 38px; line-height: 1; font-weight: 900; color: var(--career-primary); }
+.level-line .stage-name { padding-bottom: 3px; color: var(--career-muted); font-weight: 700; }
+.exp { margin-top: 20px; }
+.exp .exp-text { margin-top: 11px; text-align: right; color: #4f5367; font-size: 13px; }
+.divider { height: 1px; background: var(--career-line); margin: 22px 0 20px; }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.section-head strong { font-size: 17px; }
+.section-head a { font-size: 12px; color: var(--career-primary); text-decoration: none; font-weight: 700; }
+
+.skills { display: grid; gap: 12px; }
+.skill { display: grid; grid-template-columns: 34px 90px minmax(120px, 1fr) 32px; gap: 10px; align-items: center; }
+.skill .icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; font-size: 14px; }
+.skill .icon.green { background: #dff8ef; } .skill .icon.blue { background: #e2f0ff; } .skill .icon.orange { background: #fff0df; } .skill .icon.purple { background: var(--career-primary-light); } .skill .icon.yellow { background: #fff4d8; }
+.skill .skill-name { font-weight: 800; font-size: 14px; }
+.skill .bar { height: 8px; background: #ececf3; border-radius: 999px; overflow: hidden; }
+.skill .bar span { display: block; height: 100%; border-radius: inherit; background: var(--career-green); }
+.skill .bar.bluebar span { background: var(--career-blue); } .skill .bar.orangebar span { background: var(--career-orange); } .skill .bar.purplebar span { background: #9a6bef; } .skill .bar.yellowbar span { background: var(--career-yellow); }
+.skill .score { font-weight: 900; text-align: right; font-size: 13px; }
+
+.next-card { margin-top: 22px; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; border-radius: 16px; padding: 18px 20px; background: linear-gradient(135deg, var(--career-primary-light), var(--career-primary-soft)); border: 1px solid var(--career-primary-light); }
+.next-card .title { color: var(--career-primary-hover); font-size: 12px; font-weight: 800; }
+.next-card strong { display: block; margin-top: 4px; font-size: 17px; }
+.level-chip { border: 0; padding: 10px 14px; border-radius: 12px; color: #fff; background: linear-gradient(135deg, var(--career-primary), var(--career-primary-2)); font-size: 12px; font-weight: 900; white-space: nowrap; }
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; }
+  .avatar-stage { height: 430px; }
+}
+
+.quest-list { padding: 8px 20px; }
+.quest-item { display: grid; grid-template-columns: 24px 1fr 68px 92px; gap: 10px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--career-line); }
+.quest-item strong { font-size: 14px; } .quest-item em { font-style: normal; color: var(--career-primary); font-size: 12px; }
+.quest-item button { border: 0; border-radius: 99px; background: #e5f7f0; color: #19a878; padding: 8px; font-size: 12px; white-space: nowrap; }
+.quest-check { width: 22px; height: 22px; border: 2px solid #c9cad6; border-radius: 50%; display: grid; place-items: center; }
+.quest-item.done .quest-check { border-color: var(--career-green); background: var(--career-green); color: #fff; }
+.quest-item .primary-mini { background: var(--career-primary); color: #fff; }
+.quest-more { width: calc(100% - 40px); margin: 14px 20px 18px; border: 1px solid #ddd8fb; background: #fff; color: var(--career-primary); border-radius: 10px; padding: 12px; font-weight: 700; font-size: 12px; }
+
+.badge-card, .schedule-card { min-height: 252px; }
+.badge-card__head-right { display: flex; align-items: center; gap: 10px; }
+.badge-card__count { font-size: 12px; font-weight: 700; color: var(--career-muted); }
+.badge-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); padding: 28px 16px 24px; gap: 10px; }
+.badge-list > div { text-align: center; }
+.medal { width: 54px; height: 62px; clip-path: polygon(50% 0, 90% 18%, 90% 68%, 70% 68%, 60% 100%, 50% 82%, 40% 100%, 30% 68%, 10% 68%, 10% 18%); display: grid; place-items: center; margin: 0 auto 10px; background: #cfcfd9; color: #fff; font-size: 20px; }
+.medal.gold { background: linear-gradient(#ffc84d, #f2a200); } .medal.blue { background: linear-gradient(#6aa8ff, #3478e4); } .medal.purple { background: linear-gradient(var(--career-primary-2), var(--career-primary-hover)); }
+.badge-list strong { display: block; font-size: 12px; } .badge-list small { font-size: 11px; color: var(--career-muted); }
+.locked { opacity: .48; }
+
+/* AI recommendation — one slim banner, not a card competing with Quest/Badge. */
+.ai-recommend-banner { display: grid; grid-template-columns: 44px 1fr auto; gap: 16px; align-items: center; background: linear-gradient(135deg, var(--career-primary-soft), var(--career-primary-light)); border: 1px solid var(--career-primary-light); border-radius: 14px; padding: 18px 20px; }
+.ai-recommend-banner__icon { font-size: 34px; }
+.ai-recommend-banner__eyebrow { display: block; font-size: 11px; font-weight: 700; color: var(--career-primary-hover); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+.ai-recommend-banner__body strong { font-size: 15px; display: block; margin-bottom: 4px; }
+.ai-recommend-banner__body p { margin: 0; font-size: 12px; color: #55566a; line-height: 1.6; }
+.ai-recommend-banner button { border: 0; border-radius: 10px; background: var(--career-primary); color: #fff; padding: 12px 18px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+
+.schedule-list { padding: 8px 12px; }
+.schedule-item { display: grid; grid-template-columns: 44px 1fr 54px; gap: 9px; padding: 9px 0; border-bottom: 1px solid var(--career-line); align-items: center; }
+.schedule-item time { font-size: 11px; font-weight: 800; color: #2f2f49; } .schedule-item time small { display: block; font-size: 8px; }
+.schedule-item strong { font-size: 10px; } .schedule-item p { margin: 3px 0; font-size: 9px; color: #5c5d72; }
+.schedule-item div small { font-size: 8px; color: #85869a; }
+.schedule-item button { border: 0; border-radius: 99px; background: var(--career-primary-2); color: #fff; font-size: 8px; padding: 6px 4px; }
+
+.goal-card { margin-top: 14px; background: #fff; border: 1px solid var(--career-line); border-radius: 14px; box-shadow: var(--career-shadow); padding: 14px 20px; display: grid; grid-template-columns: 165px 1fr; align-items: center; gap: 12px; }
+.goal-card > div:first-child span { display: block; font-size: 10px; color: var(--career-muted); }
+.goal-card > div:first-child strong { display: block; margin-top: 6px; font-size: 17px; }
+.goal-steps { display: grid; grid-template-columns: repeat(5, 1fr); position: relative; }
+.goal-steps:before { content: ''; position: absolute; left: 10%; right: 10%; top: 15px; height: 2px; background: linear-gradient(90deg, var(--career-primary) 0 50%, #dddde7 50%); }
+.goal-step { position: relative; text-align: center; z-index: 1; }
+.goal-step i { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto; background: #dddde7; color: #fff; font-style: normal; font-size: 11px; }
+.goal-step.done i, .goal-step.active i { background: var(--career-primary); }
+.goal-step.active i { box-shadow: 0 0 0 7px var(--career-primary-light); }
+.goal-step span { display: block; font-size: 9px; margin-top: 7px; color: #5b5c71; }
+
+/* External tool embedded inside our own shell (see pages/InterviewPage.jsx) —
+   same idea as career-embed.js's iframe, one level in: the outer app owns
+   sidebar/header, the framed page owns everything past its own border. */
+.external-frame { height: 74vh; min-height: 560px; border: 1px solid var(--career-line); border-radius: 14px; box-shadow: var(--career-shadow); overflow: hidden; margin-top: 4px; }
+.external-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+.ai-panel { background: #fff; border-left: 1px solid var(--career-line); height: 100vh; height: 100dvh; position: sticky; top: 0; display: flex; flex-direction: column; }
+.ai-panel__head { min-height: 70px; padding: 0 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--career-line); }
+.ai-panel__head h2 { font-size: 16px; } .ai-panel__head a { font-size: 11px; color: var(--career-primary); }
+.ai-panel__head-actions { display: flex; gap: 10px; align-items: center; }
+.typing-bubble { display: inline-block; padding: 0; }
+.ai-panel__body { padding: 16px; overflow: auto; flex: 1; background: linear-gradient(180deg, #fff 0, #fbfaff 100%); }
+.coach-avatar-wrap { display: grid; grid-template-columns: 86px 1fr; gap: 10px; align-items: start; }
+.coach-avatar { width: 82px; height: 112px; border-radius: 42px 42px 16px 16px; background: linear-gradient(var(--career-primary-light), var(--career-primary-soft)); display: grid; place-items: end center; overflow: hidden; padding-top: 8px; }
+.coach-avatar img { width: 100%; height: 100%; object-fit: contain; }
+.coach-avatar__fallback { font-size: 34px; line-height: 1; padding-bottom: 14px; }
+.bubble { padding: 13px 14px; border-radius: 14px; line-height: 1.55; font-size: 12px; box-shadow: 0 5px 16px rgba(50, 44, 90, .05); white-space: pre-line; margin-bottom: 12px; }
+.bubble.left { background: #fff; border: 1px solid var(--career-line); border-top-left-radius: 4px; }
+.bubble.right { background: linear-gradient(135deg, var(--career-primary), var(--career-primary-hover)); color: #fff; margin-left: 72px; border-top-right-radius: 4px; }
+.typing-indicator { display: flex; gap: 4px; padding: 13px 14px; }
+.typing-indicator span { width: 6px; height: 6px; border-radius: 50%; background: var(--career-primary); opacity: .5; animation: typing-bounce 1s infinite ease-in-out; }
+.typing-indicator span:nth-child(2) { animation-delay: .15s; } .typing-indicator span:nth-child(3) { animation-delay: .3s; }
+@keyframes typing-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
+.typing-caption { font-size: 11px; color: var(--career-muted); margin: -6px 0 12px 4px; }
+
+/* ---- 상담실 (see pages/AiChat.jsx) — wide two-column layout for the
+   standalone AI 상담 page, distinct from the Dashboard's compact sticky
+   .ai-panel above but sharing the same conversation state (useAiChat). ---- */
+.ai-consult { margin-top: 4px; }
+.ai-consult__header { min-height: 64px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--career-line); }
+.ai-consult__header h2 { margin: 0; font-size: 16px; }
+.ai-consult__history-btn { border: 1px solid var(--career-line); background: var(--career-card); border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--career-muted); cursor: pointer; }
+.ai-consult__history-btn:hover { color: var(--career-primary); border-color: var(--career-primary); }
+
+.ai-consult__body { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 620px; }
+
+.ai-consult__coach { background: linear-gradient(160deg, var(--career-primary-light), var(--career-primary-soft)); border-right: 1px solid var(--career-line); display: flex; flex-direction: column; }
+.ai-consult__visual { position: relative; height: 300px; overflow: hidden; background: linear-gradient(180deg, var(--career-primary-light), var(--career-primary-soft)); }
+.ai-consult__visual img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center top; }
+.ai-consult__visual .coach-avatar__fallback { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 88px; }
+.ai-consult__visual-badge { position: absolute; left: 16px; top: 16px; z-index: 2; padding: 6px 10px; border-radius: 999px; background: rgba(255, 255, 255, .88); backdrop-filter: blur(8px); font-size: 11px; font-weight: 800; color: var(--career-primary); }
+
+.ai-consult__gender-switch { display: flex; gap: 8px; padding: 14px 16px 0; }
+.ai-consult__gender-switch button { flex: 1; border: 1px solid var(--career-line); background: var(--career-card); border-radius: 8px; padding: 8px 10px; font-size: 11.5px; font-weight: 700; color: var(--career-muted); cursor: pointer; }
+.ai-consult__gender-switch button.active { background: var(--career-primary-gradient); border-color: transparent; color: #fff; }
+
+.ai-consult__user-card { margin: 14px 16px 16px; background: var(--career-card); border: 1px solid var(--career-line); border-radius: 14px; padding: 16px 17px; box-shadow: 0 8px 20px rgba(40, 40, 70, .06); }
+.ai-consult__user-card h3 { margin: 0 0 12px; font-size: 13px; }
+.ai-consult__info-grid { display: grid; grid-template-columns: 70px 1fr; gap: 8px 10px; font-size: 12px; margin: 0; }
+.ai-consult__info-grid dt { color: var(--career-muted); font-weight: 700; }
+.ai-consult__info-grid dd { margin: 0; font-weight: 700; }
+.ai-consult__edit-btn { width: 100%; margin-top: 12px; border: 1px solid var(--career-line); background: var(--career-card); border-radius: 9px; padding: 9px 10px; color: var(--career-primary); font-weight: 800; font-size: 12px; cursor: pointer; }
+
+.ai-consult__chat { min-width: 0; display: flex; flex-direction: column; background: var(--career-bg); }
+.ai-consult__messages { flex: 1; padding: 20px 24px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+.ai-consult__row { display: flex; align-items: flex-end; gap: 8px; }
+.ai-consult__row.user { justify-content: flex-end; }
+.ai-consult__bubble { max-width: 68%; padding: 13px 16px; border-radius: 16px; line-height: 1.6; font-size: 13.5px; white-space: pre-line; box-shadow: 0 5px 14px rgba(20, 25, 50, .05); }
+.ai-consult__row.ai .ai-consult__bubble { background: var(--career-card); border: 1px solid var(--career-line); border-top-left-radius: 5px; }
+.ai-consult__row.user .ai-consult__bubble { color: #fff; background: var(--career-primary-gradient); border-top-right-radius: 5px; }
+.ai-consult__time { font-size: 10px; color: var(--career-muted); white-space: nowrap; margin-bottom: 4px; }
+
+.ai-consult__input { padding: 14px 20px 20px; border-top: 1px solid var(--career-line); background: var(--career-card); }
+.ai-consult__input-shell { display: flex; gap: 10px; padding: 8px; border: 1px solid var(--career-line); background: var(--career-card); border-radius: 14px; box-shadow: 0 4px 14px rgba(27, 36, 60, .04); }
+.ai-consult__input-shell input { flex: 1; min-width: 0; border: 0; outline: 0; padding: 0 10px; font-size: 13.5px; background: transparent; color: var(--career-text); }
+.ai-consult__input-shell button { width: 42px; height: 42px; flex: none; border: 0; border-radius: 12px; background: var(--career-primary-gradient); color: #fff; font-size: 18px; cursor: pointer; }
+.ai-consult__input-shell button:disabled { opacity: .5; cursor: not-allowed; }
+
+@media (max-width: 800px) {
+  .ai-consult__body { grid-template-columns: 1fr; min-height: 0; }
+  .ai-consult__coach { border-right: 0; border-bottom: 1px solid var(--career-line); }
+  .ai-consult__visual { height: 260px; }
+  .ai-consult__bubble { max-width: 86%; }
+  .ai-consult__messages { max-height: 60vh; }
+}
+
+/* 퀘스트 추천 → 원클릭 실행 (see components/ai/QuestRecommendationChip.jsx) */
+.ai-quest-chip { display: inline-flex; align-items: center; gap: 10px; margin: 2px 0 10px; padding: 10px 14px; border: 1px dashed var(--career-primary); background: var(--career-primary-light); border-radius: 12px; color: var(--career-primary); font-size: 12px; font-weight: 700; cursor: pointer; text-align: left; max-width: 100%; }
+.ai-quest-chip:hover { background: var(--career-primary); border-style: solid; color: #fff; }
+.ai-quest-chip__exp { font-size: 11px; font-weight: 800; opacity: .85; white-space: nowrap; }
+
+/* 상담 인사이트 (see pages/AiChat.jsx's InsightsCard) */
+.ai-insights { margin-top: 16px; padding: 20px 22px; }
+.ai-insights__list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ai-insights__list li { display: grid; grid-template-columns: 112px 1fr 26px; gap: 10px; align-items: center; font-size: 12px; }
+.ai-insights__label { color: var(--career-text); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-insights__bar { height: 8px; border-radius: 999px; background: var(--career-line); overflow: hidden; }
+.ai-insights__bar span { display: block; height: 100%; background: var(--career-primary-gradient); border-radius: 999px; }
+.ai-insights__count { text-align: right; font-weight: 700; color: var(--career-primary); }
+.ai-input { padding: 12px; border-top: 1px solid var(--career-line); display: grid; grid-template-columns: 1fr 40px; gap: 8px; }
+.ai-input input { border: 1px solid #e3e2eb; border-radius: 10px; padding: 11px 12px; outline: none; font-size: 12px; }
+.ai-input button { border: 0; border-radius: 10px; background: var(--career-primary); color: #fff; font-size: 17px; }
+.ai-input button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Quest page */
+.quest-progress-card { padding: 18px; margin-bottom: 14px; }
+.quest-progress-card__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.quest-progress-card__head strong { font-size: 13px; }
+.quest-progress-card__head span { font-size: 13px; font-weight: 800; color: var(--career-primary); }
+.quest-category-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.quest-category-tab { border: 1px solid var(--career-line); border-radius: 99px; padding: 8px 16px; font-size: 12px; font-weight: 700; background: #fff; color: var(--career-text); }
+.quest-category-tab.is-active { background: var(--career-primary); border-color: var(--career-primary); color: #fff; }
+.quest-empty { padding: 20px; color: var(--career-muted); font-size: 13px; }
+
+/* ---- 취업 공고 (see pages/Jobs.jsx) ----
+   Ported from an existing work24.go.kr integration (JSP + jQuery over the
+   same XML shape) — structure/field names carried over 1:1, restyled onto
+   this app's own tokens instead of the original's hardcoded #0054a6. */
+.jobs-toolbar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.jobs-search-input { flex: 1; min-width: 200px; border: 1px solid var(--career-line); border-radius: 10px; padding: 11px 14px; font-size: 13px; }
+.jobs-search-btn { border: 0; border-radius: 10px; background: var(--career-primary); color: #fff; padding: 0 20px; font-weight: 700; font-size: 13px; }
+.jobs-sort-select { border: 1px solid var(--career-line); border-radius: 10px; padding: 0 12px; font-size: 12.5px; background: #fff; color: var(--career-text); }
+.jobs-panel { padding: 18px 20px 22px; }
+.jobs-loading { padding: 40px; text-align: center; color: var(--career-muted); font-size: 13px; }
+.jobs-total { font-size: 13px; color: var(--career-muted); margin-bottom: 12px; }
+.jobs-total b { color: var(--career-primary); }
+.jobs-empty { padding: 20px; color: var(--career-muted); font-size: 13px; }
+.jobs-empty-box { text-align: center; padding: 50px 20px; border: 2px dashed var(--career-line); border-radius: 12px; }
+.jobs-empty-icon { font-size: 32px; display: block; margin-bottom: 10px; }
+.jobs-empty-box strong { display: block; margin-bottom: 6px; font-size: 15px; }
+.jobs-empty-box p { margin: 0; font-size: 12.5px; color: var(--career-muted); }
+
+.jobs-list { display: flex; flex-direction: column; gap: 10px; }
+.job-card { text-align: left; border: 1px solid var(--career-line); border-radius: 12px; padding: 16px 18px; background: #fff; transition: border-color .15s, box-shadow .15s; }
+.job-card:hover { border-color: var(--career-primary); box-shadow: 0 6px 18px rgba(94,72,169,.08); }
+.job-card__title { display: block; font-size: 15px; margin-bottom: 8px; }
+.job-card__meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12.5px; color: var(--career-muted); }
+.job-card__meta em { font-style: normal; background: var(--career-primary-light); color: var(--career-primary-hover); border-radius: 5px; padding: 2px 7px; margin-right: 6px; font-weight: 700; font-size: 11px; }
+.job-card__intro { color: var(--career-muted); }
+
+.job-detail__back { border: 0; background: none; color: var(--career-primary); font-weight: 700; font-size: 12.5px; padding: 0; margin-bottom: 16px; }
+.job-detail__company { display: block; color: var(--career-primary); font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+.job-detail__title { font-size: 19px; margin: 0 0 18px; }
+.job-detail__section { font-size: 14px; margin: 22px 0 12px; padding-left: 10px; border-left: 3px solid var(--career-primary); }
+.job-detail__table { display: grid; grid-template-columns: 110px 1fr; margin: 0; font-size: 13px; }
+.job-detail__table dt { padding: 10px 0; color: var(--career-muted); border-top: 1px solid var(--career-line); }
+.job-detail__table dd { margin: 0; padding: 10px 0; border-top: 1px solid var(--career-line); line-height: 1.6; }
+.job-detail__table dt:first-of-type, .job-detail__table dd:first-of-type { border-top: 0; }
+.job-detail__text { font-size: 13px; line-height: 1.7; white-space: pre-wrap; }
+.job-detail__sub { background: var(--career-primary-soft); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
+.job-detail__sub b { display: block; color: var(--career-primary-hover); margin-bottom: 3px; }
+.job-detail__history { max-height: 200px; overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+
+.pagination { display: flex; justify-content: center; gap: 6px; margin-top: 22px; }
+.page-btn { min-width: 34px; height: 34px; border: 1px solid var(--career-line); border-radius: 8px; background: #fff; font-size: 12.5px; color: var(--career-text); }
+.page-btn.is-active { background: var(--career-primary); border-color: var(--career-primary); color: #fff; font-weight: 700; }
+.page-btn:disabled { opacity: .4; }
+
+/* ---- 기업분석 (see pages/CompanyAnalysis.jsx) ---- */
+.fav-company-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; }
+.fav-company-row__label { font-size: 12.5px; font-weight: 700; color: var(--career-muted); margin-right: 2px; }
+.fav-company-chip { border: 1px solid var(--career-primary-light); background: var(--career-primary-light); color: var(--career-primary-hover); border-radius: 99px; padding: 7px 14px; font-size: 12.5px; font-weight: 700; }
+.fav-company-chip:hover { background: var(--career-primary); color: #fff; }
+.job-detail__title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.job-detail__title-row .job-detail__title { margin: 0; }
+.fav-toggle-btn { border: 1px solid var(--career-primary); border-radius: 99px; padding: 8px 16px; font-size: 12.5px; font-weight: 700; color: var(--career-primary); background: #fff; white-space: nowrap; }
+.fav-toggle-btn.is-active { background: var(--career-primary); color: #fff; }
+
+/* MyPage */
+.mypage-grid { grid-template-columns: 1fr 1fr 1fr; align-items: start; }
+.mypage-info-card { padding: 18px; }
+.mypage-info-card__head { padding: 0 0 14px; border: 0; }
+.mypage-info-list { margin: 0; font-size: 13px; line-height: 2.1; }
+.mypage-info-row { display: flex; justify-content: space-between; gap: 12px; }
+.mypage-info-row dt { color: var(--career-muted); }
+.mypage-info-row dd { margin: 0; text-align: right; }
+.mypage-badges { margin-top: 14px; }
+.mypage-schedule { margin-top: 14px; }
+@media (max-width: 1023px) {
+  .mypage-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 767px) {
+  .mypage-grid { grid-template-columns: 1fr; }
+}
+
+/* EXP gain floating text */
+.exp-float { position: absolute; color: var(--career-primary); font-weight: 800; font-size: 14px; animation: exp-float-up 1.1s ease-out forwards; pointer-events: none; }
+@keyframes exp-float-up { 0% { opacity: 0; transform: translateY(0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-28px); } }
+
+/* ---- 자기소개서 첨삭 (see pages/EssayReview.jsx) ----
+   Score categories reuse the Dashboard hero card's .skill/.icon/.bar/.score
+   classes so the two "graded axes" UIs (능력치, 자소서 항목별 평가) look
+   like one system rather than two different components reinventing bars. */
+.essay-form-card { padding: 22px 24px; margin-bottom: 16px; }
+.essay-field { margin-bottom: 16px; }
+.essay-field label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.essay-field__optional { font-weight: 400; color: var(--career-muted); }
+.essay-field input, .essay-field textarea { width: 100%; border: 1px solid var(--career-line); border-radius: 10px; padding: 11px 14px; font-size: 13px; font-family: inherit; resize: vertical; }
+.essay-submit-btn { border: 0; border-radius: 10px; background: var(--career-primary); color: #fff; padding: 13px 22px; font-weight: 700; font-size: 13px; }
+.essay-submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+.essay-error { margin: 12px 0 0; color: #e6534a; font-size: 13px; }
+
+.essay-result-card { padding: 24px; }
+.essay-score { display: flex; align-items: center; gap: 20px; margin-bottom: 4px; }
+.essay-score__ring {
+  --pct: 0;
+  width: 92px; height: 92px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; position: relative;
+  background: conic-gradient(var(--career-primary) calc(var(--pct) * 1%), var(--career-line) 0);
+}
+.essay-score__ring::before { content: ''; position: absolute; inset: 8px; border-radius: 50%; background: var(--career-card); }
+.essay-score__ring strong { position: relative; font-size: 24px; color: var(--career-primary); line-height: 1; }
+.essay-score__ring span { position: relative; font-size: 10px; color: var(--career-muted); margin-top: 2px; }
+.essay-summary { margin: 0; font-size: 13.5px; line-height: 1.7; color: var(--career-text); }
+.essay-category-comments { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--career-muted); }
+.essay-category-comments b { color: var(--career-text); }
+.essay-suggestions { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.9; }
+.essay-rewrite { white-space: pre-wrap; line-height: 1.7; }
+
+/* 대상 지정 (공고/기업 연동) — differentiator #1, see TargetPicker in EssayReview.jsx */
+.essay-target { margin-bottom: 16px; }
+.essay-target__open-btn { width: 100%; border: 1px dashed var(--career-line); border-radius: 10px; background: var(--career-primary-light); color: var(--career-primary); font-weight: 700; font-size: 12.5px; padding: 11px; }
+.essay-target--picked { display: flex; align-items: center; gap: 8px; border: 1px solid var(--career-line); border-radius: 10px; padding: 10px 12px; background: var(--career-primary-light); }
+.essay-target__badge { font-size: 11.5px; font-weight: 700; color: var(--career-primary); white-space: nowrap; }
+.essay-target__label { flex: 1; font-size: 12.5px; color: var(--career-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.essay-target__clear { border: 0; background: none; color: var(--career-muted); font-size: 13px; cursor: pointer; line-height: 1; padding: 2px; }
+.essay-target__panel { border: 1px solid var(--career-line); border-radius: 10px; padding: 14px; }
+.essay-target__tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.essay-target__tabs button { border: 1px solid var(--career-line); background: var(--career-card); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; color: var(--career-muted); }
+.essay-target__tabs button.active { background: var(--career-primary); border-color: var(--career-primary); color: #fff; }
+.essay-target__search { display: flex; gap: 8px; margin-bottom: 10px; }
+.essay-target__search input { flex: 1; border: 1px solid var(--career-line); border-radius: 8px; padding: 9px 12px; font-size: 12.5px; }
+.essay-target__search button { border: 0; background: var(--career-primary); color: #fff; border-radius: 8px; padding: 0 16px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+.essay-target__search button:disabled { opacity: .5; }
+.essay-target__results { list-style: none; margin: 0 0 10px; padding: 0; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.essay-target__results button { width: 100%; text-align: left; border: 1px solid var(--career-line); background: var(--career-card); border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+.essay-target__results button:disabled { opacity: .5; }
+.essay-target__empty { font-size: 12px; color: var(--career-muted); padding: 6px 2px; }
+.essay-target__cancel { border: 0; background: none; color: var(--career-muted); font-size: 12px; text-decoration: underline; padding: 0; }
+
+/* EXP/능력치 연동 — differentiator #2 */
+.essay-growth { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.essay-growth span { background: var(--career-primary-light); color: var(--career-primary); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 6px 12px; }
+
+/* 이력 저장 + 추이 그래프 — differentiator #3, see HistorySection */
+.essay-history-card { padding: 22px 24px; }
+.essay-trend { width: 100%; height: 72px; display: block; margin: 6px 0 14px; }
+.essay-history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.essay-history-list li { display: flex; align-items: center; gap: 10px; font-size: 12.5px; border-top: 1px solid var(--career-line); padding-top: 8px; }
+.essay-history-list li:first-child { border-top: 0; padding-top: 0; }
+.essay-history-score { font-weight: 700; color: var(--career-primary); width: 44px; flex: none; }
+.essay-history-label { flex: 1; color: var(--career-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.essay-history-date { color: var(--career-muted); white-space: nowrap; }

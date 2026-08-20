@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.careermate.backend.mapper.UserMapper">
+
+    <select id="findById" resultType="com.careermate.backend.domain.StudentUser">
+        SELECT * FROM careermate_student_user WHERE id = #{id}
+    </select>
+
+    <select id="findAll" resultType="com.careermate.backend.domain.StudentUser">
+        SELECT * FROM careermate_student_user ORDER BY created_at DESC
+    </select>
+
+    <select id="findByExternalUser" resultType="com.careermate.backend.domain.StudentUser">
+        SELECT * FROM careermate_student_user
+        WHERE university_code = #{universityCode} AND external_user_id = #{externalUserId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO careermate_student_user
+            (university_code, external_user_id, name, major, grade, desired_job, level, current_exp, next_level_exp)
+        VALUES
+            (#{universityCode}, #{externalUserId}, #{name}, #{major}, #{grade}, #{desiredJob}, #{level}, #{currentExp}, #{nextLevelExp})
+    </insert>
+
+    <update id="updateLevelExp">
+        UPDATE careermate_student_user
+        SET level = #{level}, current_exp = #{currentExp}, next_level_exp = #{nextLevelExp}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateAvatar">
+        UPDATE careermate_student_user
+        SET avatar_frame = #{avatarFrame}, avatar_sticker = #{avatarSticker}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

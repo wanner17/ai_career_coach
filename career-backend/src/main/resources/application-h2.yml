@@ -1,0 +1,15 @@
+# Zero-infra profile for trying the API without installing MariaDB:
+#   mvn spring-boot:run -Dspring-boot.run.profiles=h2
+# H2's MariaDB compatibility mode lets the same schema.sql/data.sql (written
+# for MariaDB syntax) run unmodified. Data resets every restart — that's fine,
+# it's a dev convenience profile, not where real data should ever live.
+spring:
+  datasource:
+    url: jdbc:h2:mem:career_db;MODE=MariaDB;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console

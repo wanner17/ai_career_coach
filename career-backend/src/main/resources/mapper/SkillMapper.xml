@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.careermate.backend.mapper.SkillMapper">
+
+    <select id="findByUserId" resultType="com.careermate.backend.domain.SkillScore">
+        SELECT * FROM careermate_skill_score WHERE user_id = #{userId}
+    </select>
+
+    <select id="findAll" resultType="com.careermate.backend.domain.SkillScore">
+        SELECT * FROM careermate_skill_score
+    </select>
+
+    <insert id="insert">
+        INSERT INTO careermate_skill_score (user_id, job_skill, resume, interview, company_analysis, career_readiness)
+        VALUES (#{userId}, #{jobSkill}, #{resume}, #{interview}, #{companyAnalysis}, #{careerReadiness})
+    </insert>
+
+    <update id="updateResume">
+        UPDATE careermate_skill_score SET resume = #{resume} WHERE user_id = #{userId}
+    </update>
+
+    <update id="updateJobSkill">
+        UPDATE careermate_skill_score SET job_skill = #{jobSkill} WHERE user_id = #{userId}
+    </update>
+
+    <update id="updateInterview">
+        UPDATE careermate_skill_score SET interview = #{interview} WHERE user_id = #{userId}
+    </update>
+
+    <update id="updateCompanyAnalysis">
+        UPDATE careermate_skill_score SET company_analysis = #{companyAnalysis} WHERE user_id = #{userId}
+    </update>
+
+    <update id="updateCareerReadiness">
+        UPDATE careermate_skill_score SET career_readiness = #{careerReadiness} WHERE user_id = #{userId}
+    </update>
+
+</mapper>

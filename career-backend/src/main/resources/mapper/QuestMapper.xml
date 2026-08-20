@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.careermate.backend.mapper.QuestMapper">
+
+    <!-- map-underscore-to-camel-case handles every column except the computed
+         "completed" alias below, which is already camelCase and maps as-is. -->
+    <select id="findAllForUser" resultType="com.careermate.backend.domain.Quest">
+        SELECT q.*, IFNULL(uq.completed, FALSE) AS completed
+        FROM careermate_quest q
+        LEFT JOIN careermate_user_quest uq ON uq.quest_id = q.id AND uq.user_id = #{userId}
+        WHERE q.status = '사용'
+        ORDER BY q.id
+    </select>
+
+    <select id="findAllCatalog" resultType="com.careermate.backend.domain.Quest">
+        SELECT * FROM careermate_quest ORDER BY id
+    </select>
+
+    <select id="findById" resultType="com.careermate.backend.domain.Quest">
+        SELECT * FROM careermate_quest WHERE id = #{id}
+    </select>
+
+    <select id="findByName" resultType="com.careermate.backend.domain.Quest">
+        SELECT * FROM careermate_quest WHERE name = #{name} LIMIT 1
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO careermate_quest (name, description, category, target_grade, exp, period, is_today, status)
+        VALUES (#{name}, #{description}, #{category}, #{targetGrade}, #{exp}, #{period}, FALSE, #{status})
+    </insert>
+
+    <update id="update">
+        UPDATE careermate_quest
+        SET name = #{name}, description = #{description}, category = #{category},
+            target_grade = #{targetGrade}, exp = #{exp}, period = #{period}, status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM careermate_quest WHERE id = #{id}
+    </delete>
+
+    <select id="findUserQuestCompleted" resultType="java.lang.Boolean">
+        SELECT completed FROM careermate_user_quest WHERE user_id = #{userId} AND quest_id = #{questId}
+    </select>
+
+    <insert id="insertUserQuestCompleted">
+        INSERT INTO careermate_user_quest (user_id, quest_id, completed, completed_at)
+        VALUES (#{userId}, #{questId}, TRUE, CURRENT_TIMESTAMP)
+    </insert>
+
+    <update id="updateUserQuestCompleted">
+        UPDATE careermate_user_quest SET completed = TRUE, completed_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId} AND quest_id = #{questId}
+    </update>
+
+    <select id="completionCounts" resultType="com.careermate.backend.domain.QuestCompletionCount">
+        SELECT quest_id AS questId, COUNT(*) AS count
+        FROM careermate_user_quest
+        WHERE completed = TRUE
+        GROUP BY quest_id
+    </select>
+
+    <select id="totalCompletedCount" resultType="int">
+        SELECT COUNT(*) FROM careermate_user_quest WHERE completed = TRUE
+    </select>
+
+    <select id="recentCompletions" resultType="com.careermate.backend.domain.QuestCompletionActivity">
+        SELECT u.name AS studentName, q.name AS questTitle, q.exp AS exp, uq.completed_at AS completedAt
+        FROM careermate_user_quest uq
+        JOIN careermate_student_user u ON u.id = uq.user_id
+        JOIN careermate_quest q ON q.id = uq.quest_id
+        WHERE uq.completed = TRUE
+        ORDER BY uq.completed_at DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
