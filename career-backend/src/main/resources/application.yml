@@ -52,3 +52,15 @@ career-mate:
     # instead of a raw crash when it's blank. Set OPENAI_API_KEY in .env.
     api-key: ${OPENAI_API_KEY:}
     model: ${OPENAI_MODEL:gpt-4o-mini}
+  ace:
+    # Company's in-house ACE AI Platform (RAG + knowledge graph) — backs
+    # AiChatService's search_school_docs tool (학교 취업지원센터 자료 검색).
+    # All three blank by default: AceService#isConfigured() then reports
+    # false and AiChatService just doesn't offer the tool — same
+    # graceful-degradation stance as openai's blank key above, not a hard
+    # failure. bucket-id is one shared bucket for now (school-wide docs);
+    # per-university buckets are a later step. Internal LAN address, not a
+    # public host — only reachable from inside the office network / VPN.
+    base-url: ${ACE_BASE_URL:}
+    api-key: ${ACE_API_KEY:}
+    bucket-id: ${ACE_BUCKET_ID:}

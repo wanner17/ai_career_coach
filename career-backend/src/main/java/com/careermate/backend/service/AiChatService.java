@@ -103,6 +103,24 @@ public class AiChatService {
                                     "keyword", Map.of("type", "string", "description", "기업명 또는 채용 관련 키워드")),
                             "required", List.of("searchType", "keyword"))));
 
+    /**
+     * ACE AI Platform(사내 RAG) 기반 — 학교 취업지원센터 자료 검색. AceService가
+     * 설정 안 됐으면(bucket 미배정 등) 이 도구 자체를 tools 목록에서 뺀다 —
+     * 아직 학교 하나만 지원하는 MVP 단계라 University별 분기는 다음 단계.
+     */
+    private static final Map<String, Object> SEARCH_SCHOOL_DOCS_TOOL = Map.of(
+            "type", "function",
+            "function", Map.of(
+                    "name", "search_school_docs",
+                    "description", "재학 중인 대학 취업지원센터의 공지/프로그램 안내/FAQ 문서에서 검색합니다. "
+                            + "그 학교에만 해당하는 제도, 일정, 프로그램 신청 방법을 물어볼 때만 사용하세요. "
+                            + "일반적인 취업 조언 질문에는 쓰지 마세요.",
+                    "parameters", Map.of(
+                            "type", "object",
+                            "properties", Map.of(
+                                    "query", Map.of("type", "string", "description", "검색할 질문 또는 키워드")),
+                            "required", List.of("query"))));
+
     @Value("${career-mate.openai.api-key:}")
     private String apiKey;
 
@@ -116,6 +134,7 @@ public class AiChatService {
     private final QuestMapper questMapper;
     private final ChatLogMapper chatLogMapper;
     private final WorknetService worknetService;
+    private final AceService aceService;
     private final SkillActivityService skillActivityService;
 
     public AiChatResponse reply(Long userId, String message) {
@@ -134,7 +153,7 @@ public class AiChatService {
         Collections.reverse(chronological); // findRecentForUser is most-recent-first; the model wants oldest-first
 
         List<Map<String, Object>> messages = new ArrayList<>();
-        messages.add(Map.of("role", "system", "content", buildSystemPrompt(user, skills, incompleteQuests)));
+        messages.add(Map.of("role", "system", "content", buildSystemPrompt(user, skills, incompleteQuests, aceService.isConfigured())));
         chronological.forEach(m -> messages.add(Map.of("role", m.getRole(), "content", m.getMessage())));
         messages.add(Map.of("role", "user", "content", message));
 
@@ -216,7 +235,12 @@ public class AiChatService {
         body.put("temperature", 0.5);
         body.put("response_format", Map.of("type", "json_object"));
         if (allowTools) {
-            body.put("tools", List.of(SEARCH_WORKNET_TOOL));
+            List<Object> tools = new ArrayList<>();
+            tools.add(SEARCH_WORKNET_TOOL);
+            if (aceService.isConfigured()) {
+                tools.add(SEARCH_SCHOOL_DOCS_TOOL);
+            }
+            body.put("tools", tools);
             body.put("tool_choice", "auto");
         }
 
@@ -262,14 +286,37 @@ public class AiChatService {
 
     private Map<String, Object> toolResultMessage(JsonNode toolCall) {
         String toolCallId = toolCall.path("id").asText();
+        String functionName = toolCall.path("function").path("name").asText();
         String argsJson = toolCall.path("function").path("arguments").asText("{}");
-        String resultJson = executeSearchWorknetTool(argsJson);
+        String resultJson = "search_school_docs".equals(functionName)
+                ? executeSearchSchoolDocsTool(argsJson)
+                : executeSearchWorknetTool(argsJson);
 
         Map<String, Object> toolMsg = new LinkedHashMap<>();
         toolMsg.put("role", "tool");
         toolMsg.put("tool_call_id", toolCallId);
         toolMsg.put("content", resultJson);
         return toolMsg;
+    }
+
+    private String executeSearchSchoolDocsTool(String argsJson) {
+        try {
+            JsonNode args = objectMapper.readTree(argsJson);
+            String query = args.path("query").asText("");
+            if (query.isBlank()) {
+                return "{\"found\":false,\"note\":\"검색어가 없습니다.\"}";
+            }
+
+            AceService.AceAnswer answer = aceService.ask(query);
+            log.info("search_school_docs tool call: query={} -> {}", query, answer == null ? "no match" : "matched");
+
+            return answer == null
+                    ? "{\"found\":false,\"note\":\"학교 자료에서 관련 내용을 찾지 못했습니다.\"}"
+                    : objectMapper.writeValueAsString(Map.of("found", true, "answer", answer.answer(), "sources", answer.sources()));
+        } catch (Exception e) {
+            log.warn("search_school_docs tool call failed", e);
+            return "{\"found\":false,\"note\":\"검색 중 오류가 발생했습니다.\"}";
+        }
     }
 
     private String executeSearchWorknetTool(String argsJson) {
@@ -357,7 +404,7 @@ public class AiChatService {
         }
     }
 
-    private String buildSystemPrompt(StudentUser user, SkillScore skills, List<Quest> incompleteQuests) {
+    private String buildSystemPrompt(StudentUser user, SkillScore skills, List<Quest> incompleteQuests, boolean schoolDocsAvailable) {
         String questLines = incompleteQuests.isEmpty()
                 ? "(미완료 퀘스트 없음)"
                 : incompleteQuests.stream()
@@ -378,7 +425,7 @@ public class AiChatService {
                 학생이 특정 기업이나 실제 채용공고에 대해 구체적으로 물어보면 search_worknet
                 도구로 실시간 데이터를 조회한 뒤 그 결과만 근거로 답변하세요. 도구 결과에 없는
                 사실은 지어내지 마세요. 일반적인 조언 질문에는 도구를 쓰지 마세요.
-
+                %s
                 아래는 상담 중인 학생의 실제 데이터입니다 — 답변에 반드시 참고하세요.
 
                 이름: %s
@@ -403,6 +450,9 @@ public class AiChatService {
                   "topic": "위 7개 중 하나"
                 }
                 """.formatted(
+                schoolDocsAvailable
+                        ? "\n                학교 고유의 제도, 일정, 프로그램 신청 방법을 물어보면 search_school_docs\n                도구로 학교 자료를 조회한 뒤 그 결과만 근거로 답변하세요. 도구가 관련 내용을\n                못 찾았다고 하면 지어내지 말고 학교 홈페이지 확인을 안내하세요.\n"
+                        : "",
                 user.getName(),
                 user.getMajor() == null ? "미입력" : user.getMajor(),
                 user.getGrade() == null ? "?" : user.getGrade(),
