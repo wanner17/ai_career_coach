@@ -33,6 +33,11 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-before-deploying-this-anywhere-real-0000}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      # search_school_docs 도구(AceService) 설정 — 셋 다 비어있으면 도구 자체가
+      # 시스템 프롬프트/tools 목록에서 빠짐 (openai 키와 같은 안전한 디폴트).
+      ACE_BASE_URL: ${ACE_BASE_URL:-}
+      ACE_API_KEY: ${ACE_API_KEY:-}
+      ACE_BUCKET_ID: ${ACE_BUCKET_ID:-}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
 
