@@ -268,15 +268,26 @@
 /* ---- 상담실 (see pages/AiChat.jsx) — wide two-column layout for the
    standalone AI 상담 page, distinct from the Dashboard's compact sticky
    .ai-panel above but sharing the same conversation state (useAiChat). ---- */
-.ai-consult { margin-top: 4px; }
-.ai-consult__header { min-height: 64px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--career-line); }
+/* overflow: visible — .card의 overflow:hidden(모서리 클리핑용)을 여기선 취소한다.
+   이 박스 자체는 절대 스크롤되지 않는데(윈도우가 스크롤됨), overflow:hidden이 있으면
+   그게 sticky 자식(.ai-consult__coach)의 "따라다닐 스크롤 기준"이 되어버려서 —
+   기준 박스가 안 움직이니 sticky도 안 움직이는 것처럼 보임(제자리 고정=static과 동일해짐).
+   대신 원래 클리핑이 가려주던 네 모서리는 아래에서 각 요소에 직접 둥글게 처리한다. */
+.ai-consult { margin-top: 4px; overflow: visible; }
+.ai-consult__header { min-height: 64px; padding: 0 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--career-line); border-top-left-radius: 14px; border-top-right-radius: 14px; }
 .ai-consult__header h2 { margin: 0; font-size: 16px; }
 .ai-consult__history-btn { border: 1px solid var(--career-line); background: var(--career-card); border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--career-muted); cursor: pointer; }
 .ai-consult__history-btn:hover { color: var(--career-primary); border-color: var(--career-primary); }
 
 .ai-consult__body { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 620px; }
 
-.ai-consult__coach { background: linear-gradient(160deg, var(--career-primary-light), var(--career-primary-soft)); border-right: 1px solid var(--career-line); display: flex; flex-direction: column; }
+/* 그라데이션 배경은 그리드 기본값(stretch)대로 채팅 컬럼 높이만큼 끝까지 늘어난다 —
+   sticky를 이 박스 자체가 아니라 안쪽 .ai-consult__coach-inner에 걸어서, 콘텐츠는
+   화면에 붙어 떠다니고 그 아래 남는 공간은 흰 여백 대신 이 그라데이션이 계속 채운다. */
+.ai-consult__coach { background: linear-gradient(160deg, var(--career-primary-light), var(--career-primary-soft)); border-right: 1px solid var(--career-line); display: flex; flex-direction: column; border-bottom-left-radius: 14px; }
+/* .career-sidebar가 페이지 스크롤에 붙어있는 것과 같은 sticky 패턴 — 다만 배경은
+   위 .ai-consult__coach가 담당하고, 이 래퍼는 실제 콘텐츠 높이만큼만 떠다닌다. */
+.ai-consult__coach-inner { display: flex; flex-direction: column; position: sticky; top: 20px; }
 .ai-consult__visual { position: relative; height: 300px; overflow: hidden; background: linear-gradient(180deg, var(--career-primary-light), var(--career-primary-soft)); }
 .ai-consult__visual img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center top; }
 .ai-consult__visual .coach-avatar__fallback { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 88px; }
@@ -302,7 +313,7 @@
 .ai-consult__row.user .ai-consult__bubble { color: #fff; background: var(--career-primary-gradient); border-top-right-radius: 5px; }
 .ai-consult__time { font-size: 10px; color: var(--career-muted); white-space: nowrap; margin-bottom: 4px; }
 
-.ai-consult__input { padding: 14px 20px 20px; border-top: 1px solid var(--career-line); background: var(--career-card); }
+.ai-consult__input { padding: 14px 20px 20px; border-top: 1px solid var(--career-line); background: var(--career-card); border-bottom-right-radius: 14px; }
 .ai-consult__input-shell { display: flex; gap: 10px; padding: 8px; border: 1px solid var(--career-line); background: var(--career-card); border-radius: 14px; box-shadow: 0 4px 14px rgba(27, 36, 60, .04); }
 .ai-consult__input-shell input { flex: 1; min-width: 0; border: 0; outline: 0; padding: 0 10px; font-size: 13.5px; background: transparent; color: var(--career-text); }
 .ai-consult__input-shell button { width: 42px; height: 42px; flex: none; border: 0; border-radius: 12px; background: var(--career-primary-gradient); color: #fff; font-size: 18px; cursor: pointer; }
@@ -310,7 +321,10 @@
 
 @media (max-width: 800px) {
   .ai-consult__body { grid-template-columns: 1fr; min-height: 0; }
+  /* 1열로 쌓이는 레이아웃에선 채팅이 자체 내부 스크롤(max-height:60vh, 아래)이라
+     페이지 스크롤을 따라다닐 이유가 없음 — 데스크톱 sticky 해제. */
   .ai-consult__coach { border-right: 0; border-bottom: 1px solid var(--career-line); }
+  .ai-consult__coach-inner { position: static; }
   .ai-consult__visual { height: 260px; }
   .ai-consult__bubble { max-width: 86%; }
   .ai-consult__messages { max-height: 60vh; }

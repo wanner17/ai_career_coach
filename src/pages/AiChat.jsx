@@ -75,26 +75,31 @@ export default function AiChat({ navigate }) {
 
         <div className="ai-consult__body">
           <aside className="ai-consult__coach">
-            <div className="ai-consult__visual">
-              <span className="ai-consult__visual-badge">✦ AI Career Coach</span>
-              <CoachAvatar />
-            </div>
+            {/* 그라데이션 배경은 바깥 aside가 채팅 컬럼 높이만큼 끝까지 이어서 채우고,
+                sticky는 이 안쪽 래퍼에만 건다 — 콘텐츠 높이만큼만 뜬 채 스크롤 따라
+                떠다니고, 그 아래 남는 배경은 흰 여백 대신 같은 그라데이션이 계속됨. */}
+            <div className="ai-consult__coach-inner">
+              <div className="ai-consult__visual">
+                <span className="ai-consult__visual-badge">✦ AI Career Coach</span>
+                <CoachAvatar />
+              </div>
 
-            <div className="ai-consult__gender-switch">
-              <button type="button" className={avatarGender === 'FEMALE' ? 'active' : ''} onClick={() => setAvatarGender('FEMALE')}>여자 코치</button>
-              <button type="button" className={avatarGender === 'MALE' ? 'active' : ''} onClick={() => setAvatarGender('MALE')}>남자 코치</button>
-            </div>
+              <div className="ai-consult__gender-switch">
+                <button type="button" className={avatarGender === 'FEMALE' ? 'active' : ''} onClick={() => setAvatarGender('FEMALE')}>여자 코치</button>
+                <button type="button" className={avatarGender === 'MALE' ? 'active' : ''} onClick={() => setAvatarGender('MALE')}>남자 코치</button>
+              </div>
 
-            <section className="ai-consult__user-card">
-              <h3>{user.name}님의 정보</h3>
-              <dl className="ai-consult__info-grid">
-                <dt>학과</dt><dd>{user.major || '미입력'}</dd>
-                <dt>학년</dt><dd>{user.grade}학년</dd>
-                <dt>희망직무</dt><dd>{user.desiredJob || '미입력'}</dd>
-                <dt>현재 레벨</dt><dd>Lv.{user.level}{title ? ` · ${title}` : ''}</dd>
-              </dl>
-              <button type="button" className="ai-consult__edit-btn" onClick={() => navigate('/mypage')}>정보 수정</button>
-            </section>
+              <section className="ai-consult__user-card">
+                <h3>{user.name}님의 정보</h3>
+                <dl className="ai-consult__info-grid">
+                  <dt>학과</dt><dd>{user.major || '미입력'}</dd>
+                  <dt>학년</dt><dd>{user.grade}학년</dd>
+                  <dt>희망직무</dt><dd>{user.desiredJob || '미입력'}</dd>
+                  <dt>현재 레벨</dt><dd>Lv.{user.level}{title ? ` · ${title}` : ''}</dd>
+                </dl>
+                <button type="button" className="ai-consult__edit-btn" onClick={() => navigate('/mypage')}>정보 수정</button>
+              </section>
+            </div>
           </aside>
 
           <main className="ai-consult__chat">
