@@ -279,7 +279,12 @@
 .ai-consult__history-btn { border: 1px solid var(--career-line); background: var(--career-card); border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--career-muted); cursor: pointer; }
 .ai-consult__history-btn:hover { color: var(--career-primary); border-color: var(--career-primary); }
 
-.ai-consult__body { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 620px; }
+/* height(뷰포트 기준 상한)를 둬야 .ai-consult__messages의 flex:1 + overflow:auto가
+   실제로 넘칠 공간을 갖게 되어 그 안에서만 스크롤된다 — min-height만 있으면 카드
+   전체가 메시지 수만큼 계속 늘어나서 창 전체가 스크롤되고, 채팅을 보낼 때 JS가
+   내부 스크롤을 내려도(bodyRef.scrollTop) 그 박스 자체가 넘친 적이 없어서 아무
+   효과가 없었다. 200px는 위쪽 페이지 헤더 + ai-consult__header가 차지하는 대략치. */
+.ai-consult__body { display: grid; grid-template-columns: 300px minmax(0, 1fr); height: calc(100vh - 200px); min-height: 620px; }
 
 /* 그라데이션 배경은 그리드 기본값(stretch)대로 채팅 컬럼 높이만큼 끝까지 늘어난다 —
    sticky를 이 박스 자체가 아니라 안쪽 .ai-consult__coach-inner에 걸어서, 콘텐츠는
@@ -304,8 +309,13 @@
 .ai-consult__info-grid dd { margin: 0; font-weight: 700; }
 .ai-consult__edit-btn { width: 100%; margin-top: 12px; border: 1px solid var(--career-line); background: var(--career-card); border-radius: 9px; padding: 9px 10px; color: var(--career-primary); font-weight: 800; font-size: 12px; cursor: pointer; }
 
-.ai-consult__chat { min-width: 0; display: flex; flex-direction: column; background: var(--career-bg); }
-.ai-consult__messages { flex: 1; padding: 20px 24px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+/* min-height: 0 — flex/grid 아이템 기본값(min-height:auto)은 내용 크기보다 안
+   작아지려고 해서, 부모에 아무리 height를 정해줘도 메시지가 많으면 이 박스가
+   그냥 다 담을 만큼 계속 늘어나 버린다(overflow:auto가 있는 자식까지 무의미해짐).
+   0으로 풀어줘야 진짜로 부모 높이에 맞춰 눌리고, 그 안 .ai-consult__messages가
+   대신 스크롤된다. */
+.ai-consult__chat { min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--career-bg); }
+.ai-consult__messages { flex: 1; min-height: 0; padding: 20px 24px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
 .ai-consult__row { display: flex; align-items: flex-end; gap: 8px; }
 .ai-consult__row.user { justify-content: flex-end; }
 .ai-consult__bubble { max-width: 68%; padding: 13px 16px; border-radius: 16px; line-height: 1.6; font-size: 13.5px; white-space: pre-line; box-shadow: 0 5px 14px rgba(20, 25, 50, .05); }
@@ -320,7 +330,7 @@
 .ai-consult__input-shell button:disabled { opacity: .5; cursor: not-allowed; }
 
 @media (max-width: 800px) {
-  .ai-consult__body { grid-template-columns: 1fr; min-height: 0; }
+  .ai-consult__body { grid-template-columns: 1fr; height: auto; min-height: 0; }
   /* 1열로 쌓이는 레이아웃에선 채팅이 자체 내부 스크롤(max-height:60vh, 아래)이라
      페이지 스크롤을 따라다닐 이유가 없음 — 데스크톱 sticky 해제. */
   .ai-consult__coach { border-right: 0; border-bottom: 1px solid var(--career-line); }
