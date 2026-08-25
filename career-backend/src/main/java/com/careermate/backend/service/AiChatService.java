@@ -357,15 +357,20 @@ public class AiChatService {
                 String chunk = full.substring(sentUpTo.get(), safeEnd);
                 sentUpTo.set(safeEnd);
                 try {
-                    // JSON-encoded, not raw text — a chunk that happens to start with
-                    // a real space (OpenAI puts word-boundary spaces at the front of a
-                    // delta, e.g. "안녕" then " 하세요") would otherwise sit right after
-                    // "data:" on the wire, indistinguishable from the SSE convention's
-                    // own separator space; a spec-compliant parser strips that one
-                    // leading space unconditionally (see client.js's apiPostStream),
-                    // eating the real one and gluing words together. Wrapping in quotes
-                    // moves the space inside them, out of stripping range.
-                    emitter.send(SseEmitter.event().name("chunk").data(chunk, MediaType.APPLICATION_JSON));
+                    // JSON-encoded ourselves (objectMapper.writeValueAsString), then sent
+                    // as plain text — not raw text, and not Spring's .data(obj, APPLICATION_JSON)
+                    // (that had Spring pick an HttpMessageConverter for a bare String at
+                    // JSON media type, which errored out mid-stream instead of writing
+                    // anything). A chunk that happens to start with a real space (OpenAI
+                    // puts word-boundary spaces at the front of a delta, e.g. "안녕" then
+                    // " 하세요") would otherwise sit right after "data:" on the wire,
+                    // indistinguishable from the SSE convention's own separator space; a
+                    // spec-compliant parser strips that one leading space unconditionally
+                    // (see client.js's apiPostStream), eating the real one and gluing words
+                    // together. Wrapping in quotes moves the space inside them, out of
+                    // stripping range — JsonProcessingException is an IOException subtype,
+                    // so it's covered by the same catch as emitter.send() below.
+                    emitter.send(SseEmitter.event().name("chunk").data(objectMapper.writeValueAsString(chunk)));
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -402,7 +407,7 @@ public class AiChatService {
     private void flushRemainder(SseEmitter emitter, String reply, AtomicInteger sentUpTo) {
         if (sentUpTo.get() >= reply.length()) return;
         try {
-            emitter.send(SseEmitter.event().name("chunk").data(reply.substring(sentUpTo.get()), MediaType.APPLICATION_JSON));
+            emitter.send(SseEmitter.event().name("chunk").data(objectMapper.writeValueAsString(reply.substring(sentUpTo.get()))));
             sentUpTo.set(reply.length());
         } catch (IOException e) {
             log.debug("final chunk flush failed (client likely disconnected)", e);
