@@ -84,6 +84,14 @@ public class AiChatService {
      */
     private static final String META_DELIMITER = "\n<<<CM_META>>>\n";
 
+    // OpenAI streams deltas as fast as they arrive over the wire — often several
+    // per network frame — which reads as an unnaturally instant "typing" burst
+    // on the client instead of a readable pace. A small per-chunk pause here
+    // (background streamExecutor thread, not the request thread — see
+    // replyStream) paces it back down to something legible without adding
+    // meaningful latency to the overall reply.
+    private static final long STREAM_CHUNK_DELAY_MS = 25;
+
     /** One thread per in-flight streamed chat turn — MVP traffic, not worth a bounded pool. */
     private final ExecutorService streamExecutor = Executors.newCachedThreadPool();
 
@@ -352,6 +360,11 @@ public class AiChatService {
                     emitter.send(SseEmitter.event().name("chunk").data(chunk));
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
+                }
+                try {
+                    Thread.sleep(STREAM_CHUNK_DELAY_MS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
                 }
             }
         });
