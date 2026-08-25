@@ -45,4 +45,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+    /**
+     * OncePerRequestFilter's default (true) skips this filter on the ASYNC
+     * dispatch that resumes an SseEmitter-backed request (AiChatController's
+     * /chat/stream) — so the JWT-derived SecurityContext set above during the
+     * original REQUEST dispatch never gets re-established for that
+     * continuation, and SecurityConfig's anyRequest().authenticated() then
+     * denies it as unauthenticated. Re-running this filter on ASYNC dispatch
+     * is safe (it's stateless — just re-reads the same header again).
+     */
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;
+    }
 }
