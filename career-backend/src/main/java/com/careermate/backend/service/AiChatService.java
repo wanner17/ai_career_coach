@@ -489,6 +489,13 @@ public class AiChatService {
      * one axis still tied to chat engagement rather than a content page.
      */
     private SkillGain applyChatSkillBump(Long userId, String topic) {
+        // Same Map.of(...).get(null) NPE trap as TOPICS.contains(null) above — topic
+        // is legitimately null whenever the model's topic wasn't one of the tracked
+        // ones (or the meta block failed to parse), and this ran on every single
+        // chat turn, tracked or not, so this was firing constantly.
+        if (topic == null) {
+            return null;
+        }
         SkillTarget target = TOPIC_TO_SKILL.get(topic);
         if (target == null) {
             return null;
