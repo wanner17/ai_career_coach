@@ -6,7 +6,9 @@ INSERT IGNORE INTO careermate_university
   (code, name, primary_color, primary_color_hover, primary_color_light, primary_color_soft, primary_color2, primary_color_shadow, logo_url)
 VALUES
   ('SAMPLE',       '샘플대학교', '#7053f6', '#6044e6', '#f3efff', '#f8f6ff', '#8e71ff', 'rgba(112,83,246,.24)', '/assets/logo/sample.png'),
-  ('UNIVERSITY_B', '미래대학교', '#1565c0', '#0d47a1', '#e8f1fb', '#f3f8fd', '#42a5f5', 'rgba(21,101,192,.24)', NULL);
+  ('UNIVERSITY_B', '미래대학교', '#1565c0', '#0d47a1', '#e8f1fb', '#f3f8fd', '#42a5f5', 'rgba(21,101,192,.24)', NULL),
+  -- e-myjob 임베드용. src/config/universities.js의 EMYJOB 항목과 값 맞춤.
+  ('EMYJOB',       'e-myJob',   '#5478ce', '#3d5fb0', '#eaeffa', '#f5f7fc', '#7c9adf', 'rgba(84,120,206,.24)', NULL);
 
 -- external_user_id '20231234' stands in for whatever student-number field the
 -- host university's own login session would hand us (see AuthController).

@@ -15,6 +15,9 @@ export const getDashboard = () => apiGet('/api/career/dashboard/me');
 export const updateAvatar = (payload) => apiPut('/api/career/user/me/avatar', payload);
 export const updateProfile = (payload) => apiPut('/api/career/user/me/profile', payload);
 
+// 신규 계정 첫 진입 화면(닉네임/아바타 선택) — see CareerContext's 'onboarding' phase.
+export const completeOnboarding = (payload) => apiPut('/api/career/user/me/onboarding', payload);
+
 export const getQuests = () => apiGet('/api/career/quests');
 export const completeQuest = (questId) => apiPost(`/api/career/quests/${questId}/complete`);
 

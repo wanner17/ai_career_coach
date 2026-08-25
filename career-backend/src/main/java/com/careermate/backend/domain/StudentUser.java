@@ -27,5 +27,7 @@ public class StudentUser {
     private Integer nextLevelExp;
     private String avatarFrame;
     private String avatarSticker;
+    /** MALE/FEMALE — see config/avatarEvolution.js; picked once at onboarding. */
+    private String avatarGender;
     private LocalDateTime createdAt;
 }

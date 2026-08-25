@@ -24,6 +24,7 @@ public class UserResponse {
     private Integer nextLevelExp;
     private String avatarFrame;
     private String avatarSticker;
+    private String avatarGender;
 
     public static UserResponse from(StudentUser u) {
         return UserResponse.builder()
@@ -38,6 +39,7 @@ public class UserResponse {
                 .nextLevelExp(u.getNextLevelExp())
                 .avatarFrame(u.getAvatarFrame())
                 .avatarSticker(u.getAvatarSticker())
+                .avatarGender(u.getAvatarGender())
                 .build();
     }
 }

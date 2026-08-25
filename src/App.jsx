@@ -77,7 +77,12 @@ export default function App() {
   return (
     <ThemeProvider>
       {STUDENT_PATHS.has(pathname)
-        ? <CareerProvider><AvatarGenderProvider>{page}</AvatarGenderProvider></CareerProvider>
+        // AvatarGenderProvider now wraps CareerProvider (not the other way
+        // around) so CareerContext can read/set avatarGender itself — it
+        // syncs the account's real avatarGender down on boot and during
+        // onboarding (see CareerContext.jsx), which needs useAvatarGender()
+        // to be callable from inside CareerProvider's own body.
+        ? <AvatarGenderProvider><CareerProvider>{page}</CareerProvider></AvatarGenderProvider>
         : page}
     </ThemeProvider>
   );

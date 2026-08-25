@@ -64,6 +64,26 @@ button { cursor: pointer; }
 .identify-box button { width: 100%; margin-top: 4px; border: 0; background: var(--career-primary); color: #fff; border-radius: 10px; padding: 12px; font-weight: 700; font-size: 13px; }
 .identify-box button:disabled { opacity: .5; }
 
+/* 신규 계정 온보딩(닉네임+아바타 선택) — components/onboarding/OnboardingScreen.jsx.
+   identify-box 카드 톤 그대로 쓰되, 아바타 미리보기 2장 나란히 놓느라 좀 더 넓다. */
+.onboarding-box { background: #fff; border: 1px solid var(--career-line); border-radius: 16px; box-shadow: var(--career-shadow); padding: 30px 28px; width: 100%; max-width: 420px; text-align: center; }
+.onboarding-box h2 { margin: 0 0 8px; font-size: 19px; }
+.onboarding-box > p { margin: 0 0 22px; color: var(--career-muted); font-size: 12.5px; line-height: 1.6; }
+.onboarding-box__name { display: block; text-align: left; font-size: 12px; font-weight: 700; margin-bottom: 20px; color: #45465c; }
+.onboarding-box__name input { width: 100%; margin-top: 6px; border: 1px solid var(--career-line); border-radius: 9px; padding: 11px 12px; font-size: 13.5px; }
+
+.onboarding-box__avatars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+.onboarding-avatar-card { border: 2px solid var(--career-line); border-radius: 14px; background: var(--career-bg); padding: 10px 10px 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+.onboarding-avatar-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; object-position: center top; border-radius: 10px; background: var(--career-primary-light); }
+.onboarding-avatar-card span { font-size: 12px; font-weight: 700; color: var(--career-muted); }
+.onboarding-avatar-card:hover { transform: translateY(-2px); }
+.onboarding-avatar-card.is-selected { border-color: var(--career-primary); background: var(--career-primary-light); }
+.onboarding-avatar-card.is-selected span { color: var(--career-primary); }
+
+.onboarding-box__error { margin: 0 0 12px; color: #d92d20; font-size: 12px; }
+.onboarding-box button[type="submit"] { width: 100%; border: 0; background: var(--career-primary); color: #fff; border-radius: 10px; padding: 13px; font-weight: 700; font-size: 13.5px; cursor: pointer; }
+.onboarding-box button[type="submit"]:disabled { opacity: .5; cursor: not-allowed; }
+
 /* ---- Common: ProgressBar (shared shape for level bar + skill bars) ---- */
 .progress, .mini-progress { height: 8px; background: #eeeef4; border-radius: 99px; overflow: hidden; }
 .progress i, .mini-progress i {

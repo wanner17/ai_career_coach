@@ -40,4 +40,10 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateOnboarding">
+        UPDATE careermate_student_user
+        SET name = #{name}, avatar_gender = #{avatarGender}
+        WHERE id = #{id}
+    </update>
+
 </mapper>

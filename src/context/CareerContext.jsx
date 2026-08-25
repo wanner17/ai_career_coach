@@ -4,6 +4,8 @@ import { ApiError } from '../api/client.js';
 import { didAvatarEvolve, getAvatarStage } from '../config/avatarEvolution.js';
 import { getToken, setToken, clearToken } from '../utils/authStorage.js';
 import { useTheme } from './ThemeContext.jsx';
+import { useAvatarGender } from './AvatarGenderContext.jsx';
+import OnboardingScreen from '../components/onboarding/OnboardingScreen.jsx';
 
 const CareerContext = createContext(null);
 
@@ -27,12 +29,13 @@ let toastSeq = 1;
  */
 export function CareerProvider({ children }) {
   const theme = useTheme();
+  const { setAvatarGender } = useAvatarGender();
 
   const [user, setUser] = useState(null);
   const [skills, setSkills] = useState(null);
   const [quests, setQuests] = useState([]);
   const [badges, setBadges] = useState([]);
-  const [phase, setPhase] = useState('loading'); // loading | identify | error | ready
+  const [phase, setPhase] = useState('loading'); // loading | identify | onboarding | error | ready
   const [error, setError] = useState(null);
 
   const [toasts, setToasts] = useState([]);
@@ -76,10 +79,42 @@ export function CareerProvider({ children }) {
           name: manualIdentify?.name || params.get('studentName') || undefined,
         });
         setToken(identified.token);
+
+        if (identified.newUser) {
+          // Fresh account — let the student pick a real nickname/avatar
+          // before ever seeing the dashboard, instead of silently landing on
+          // provisioning defaults ("새로운 학생", FEMALE) they never chose.
+          // completeOnboarding() below picks the boot flow back up.
+          setUser(identified.user);
+          setPhase('onboarding');
+          return;
+        }
       }
 
       const dashboard = await api.getDashboard();
       setUser(dashboard.user);
+      setSkills(dashboard.skills);
+      setQuests(dashboard.quests);
+      setBadges(dashboard.badges);
+      // The account's real saved style, not just this device's local default —
+      // matters most the first time a returning student opens a new browser/device.
+      if (dashboard.user.avatarGender) setAvatarGender(dashboard.user.avatarGender);
+      setPhase('ready');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : '데이터를 불러오지 못했습니다.');
+      setPhase('error');
+    }
+  }, [theme.code, setAvatarGender]);
+
+  // Onboarding screen's submit — saves the chosen name/avatar, then continues
+  // exactly where boot() would have gone next (fetch the rest of the dashboard).
+  const completeOnboarding = useCallback(async (name, avatarGender) => {
+    const updatedUser = await api.completeOnboarding({ name, avatarGender });
+    setUser(updatedUser);
+    setAvatarGender(avatarGender);
+    setPhase('loading');
+    try {
+      const dashboard = await api.getDashboard();
       setSkills(dashboard.skills);
       setQuests(dashboard.quests);
       setBadges(dashboard.badges);
@@ -88,7 +123,7 @@ export function CareerProvider({ children }) {
       setError(err instanceof ApiError ? err.message : '데이터를 불러오지 못했습니다.');
       setPhase('error');
     }
-  }, [theme.code]);
+  }, [setAvatarGender]);
 
   useEffect(() => {
     boot();
@@ -158,6 +193,9 @@ export function CareerProvider({ children }) {
   }
   if (phase === 'identify') {
     return <IdentifyForm universityName={theme.name} onSubmit={identifyManually} />;
+  }
+  if (phase === 'onboarding') {
+    return <OnboardingScreen universityName={theme.name} defaultName={user?.name} onSubmit={completeOnboarding} />;
   }
   if (phase === 'error') {
     return (

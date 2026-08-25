@@ -29,6 +29,11 @@ public class SchemaMigrationRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         addColumnIfMissing("careermate_ai_chat_log", "topic", "VARCHAR(20) NULL");
+        // MALE/FEMALE — which evolution-avatar art style (see config/avatarEvolution.js
+        // on the frontend) a student sees at their level. Picked once during the new-
+        // account onboarding screen (see UserController#completeOnboarding); defaults to
+        // FEMALE for any row created before this column existed.
+        addColumnIfMissing("careermate_student_user", "avatar_gender", "VARCHAR(10) NOT NULL DEFAULT 'FEMALE'");
         // careermate_quest.skill_target/skill_points from an earlier 능력치
         // design (quest completion → skill bump) were reverted — 능력치 now
         // grows from real feature usage instead (AiChatService/

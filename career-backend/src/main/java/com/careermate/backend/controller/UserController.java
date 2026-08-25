@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.careermate.backend.dto.request.OnboardingRequest;
 import com.careermate.backend.dto.request.UpdateAvatarRequest;
 import com.careermate.backend.dto.request.UpdateProfileRequest;
 import com.careermate.backend.dto.response.DashboardResponse;
@@ -44,5 +45,11 @@ public class UserController {
     @PutMapping("/user/me/profile")
     public UserResponse updateProfile(@AuthenticationPrincipal Long userId, @Valid @RequestBody UpdateProfileRequest request) {
         return userService.updateProfile(userId, request);
+    }
+
+    /** 신규 계정 첫 진입 화면(닉네임/아바타 선택) — see OnboardingRequest. */
+    @PutMapping("/user/me/onboarding")
+    public UserResponse completeOnboarding(@AuthenticationPrincipal Long userId, @Valid @RequestBody OnboardingRequest request) {
+        return userService.completeOnboarding(userId, request);
     }
 }

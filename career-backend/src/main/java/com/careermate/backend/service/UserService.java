@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.careermate.backend.domain.SkillScore;
 import com.careermate.backend.domain.StudentUser;
+import com.careermate.backend.dto.request.OnboardingRequest;
 import com.careermate.backend.dto.request.UpdateAvatarRequest;
 import com.careermate.backend.dto.request.UpdateProfileRequest;
 import com.careermate.backend.dto.response.DashboardResponse;
@@ -84,6 +85,14 @@ public class UserService {
         String desiredJob = request.getDesiredJob() == null || request.getDesiredJob().isBlank() ? null : request.getDesiredJob().trim();
 
         userMapper.updateProfile(userId, request.getName().trim(), major, request.getGrade(), desiredJob);
+        return UserResponse.from(userMapper.findById(userId));
+    }
+
+    /** 신규 계정 첫 진입 시 닉네임/아바타 선택 — see OnboardingRequest. */
+    public UserResponse completeOnboarding(Long userId, OnboardingRequest request) {
+        getUserOrThrow(userId); // 404 before a pointless write
+
+        userMapper.updateOnboarding(userId, request.getName().trim(), request.getAvatarGender());
         return UserResponse.from(userMapper.findById(userId));
     }
 }
