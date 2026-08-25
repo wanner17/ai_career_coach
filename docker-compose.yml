@@ -48,6 +48,7 @@ services:
       context: .
       args:
         VITE_API_BASE: ${VITE_API_BASE:-}
+        VITE_BASE_PATH: ${VITE_BASE_PATH:-/}
     restart: unless-stopped
     depends_on:
       - backend
