@@ -2,7 +2,7 @@ import { createContext, useContext, useCallback, useEffect, useRef, useState } f
 import * as api from '../api/career.js';
 import { ApiError } from '../api/client.js';
 import { didAvatarEvolve, getAvatarStage } from '../config/avatarEvolution.js';
-import { getToken, setToken, clearToken } from '../utils/authStorage.js';
+import { getToken, setToken, clearToken, getIdentity, setIdentity } from '../utils/authStorage.js';
 import { useTheme } from './ThemeContext.jsx';
 import { useAvatarGender } from './AvatarGenderContext.jsx';
 import OnboardingScreen from '../components/onboarding/OnboardingScreen.jsx';
@@ -68,9 +68,20 @@ export function CareerProvider({ children }) {
     setPhase('loading');
     setError(null);
     try {
-      if (!getToken()) {
-        const params = new URLSearchParams(window.location.search);
-        const externalUserId = manualIdentify?.externalUserId || params.get('externalUserId');
+      const params = new URLSearchParams(window.location.search);
+      const externalUserId = manualIdentify?.externalUserId || params.get('externalUserId');
+
+      // A cached token only counts as "already signed in" if it belongs to
+      // *this* (university, externalUserId) pair — otherwise it's a leftover
+      // from a different host-page account in the same browser (see
+      // authStorage.js's IDENTITY_KEY doc comment), and reusing it would show
+      // the wrong student's data instead of re-identifying this one.
+      const cachedIdentity = getIdentity();
+      const identityMatches = !externalUserId
+        || (cachedIdentity?.universityCode === theme.code && cachedIdentity?.externalUserId === externalUserId);
+
+      if (!getToken() || !identityMatches) {
+        if (!identityMatches) clearToken();
 
         if (!externalUserId) {
           setPhase('identify'); // direct/dev access, nobody vouched for a student — ask
@@ -92,6 +103,7 @@ export function CareerProvider({ children }) {
         }
 
         setToken(identified.token);
+        setIdentity(theme.code, externalUserId);
       }
 
       const dashboard = await api.getDashboard();
@@ -118,6 +130,7 @@ export function CareerProvider({ children }) {
     const pending = pendingSignupRef.current;
     const identified = await api.completeSignup({ ...pending, name, avatarGender });
     setToken(identified.token);
+    setIdentity(pending.universityCode, pending.externalUserId);
     setUser(identified.user);
     setAvatarGender(avatarGender);
     setPhase('loading');
