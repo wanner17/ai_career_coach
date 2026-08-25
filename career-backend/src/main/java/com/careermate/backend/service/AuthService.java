@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.careermate.backend.domain.SkillScore;
 import com.careermate.backend.domain.StudentUser;
+import com.careermate.backend.dto.request.CompleteSignupRequest;
 import com.careermate.backend.dto.request.IdentifyRequest;
 import com.careermate.backend.dto.response.IdentifyResponse;
 import com.careermate.backend.dto.response.UserResponse;
@@ -17,8 +18,16 @@ import lombok.RequiredArgsConstructor;
 /**
  * "Login" for this widget is really "identify" — the host university page
  * already authenticated the student before it ever loaded our iframe, so we
- * trust (universityCode, externalUserId) and either load that student's
- * existing row or provision a fresh one. No password anywhere in this flow.
+ * trust (universityCode, externalUserId). No password anywhere in this flow.
+ *
+ * A StudentUser row is only ever created by completeSignup() — i.e. once the
+ * student has actually picked a nickname/avatar and pressed 시작하기 on the
+ * onboarding screen (see OnboardingScreen.jsx). identify() itself never
+ * provisions anything: for an unrecognized (universityCode, externalUserId)
+ * pair it just reports newUser=true with no token, and the frontend holds
+ * that pair through the onboarding screen to submit with completeSignup().
+ * This means closing the tab mid-onboarding leaves no half-set-up row behind
+ * at all — nothing to clean up, nothing to re-detect on a later visit.
  */
 @Service
 @RequiredArgsConstructor
@@ -31,41 +40,48 @@ public class AuthService {
     private final SkillMapper skillMapper;
     private final JwtService jwtService;
 
-    @Transactional
     public IdentifyResponse identify(IdentifyRequest request) {
         StudentUser user = userMapper.findByExternalUser(request.getUniversityCode(), request.getExternalUserId());
+        if (user == null) {
+            // No row, no token — see class javadoc. The frontend shows the
+            // onboarding screen and calls completeSignup() to actually create it.
+            return IdentifyResponse.builder().newUser(true).build();
+        }
 
+        return IdentifyResponse.builder()
+                .token(jwtService.generateToken(user.getId()))
+                .user(UserResponse.from(user))
+                .newUser(false)
+                .build();
+    }
+
+    /** Onboarding screen's submit — the only path that ever creates a StudentUser row. */
+    @Transactional
+    public IdentifyResponse completeSignup(CompleteSignupRequest request) {
+        // Guard against a double-submit (e.g. two tabs open, or a retried request
+        // after a dropped response) provisioning the same student twice.
+        StudentUser user = userMapper.findByExternalUser(request.getUniversityCode(), request.getExternalUserId());
         if (user == null) {
             user = provisionNewStudent(request);
         }
 
-        String token = jwtService.generateToken(user.getId());
-        // "newUser" really means "still needs the onboarding screen" — not just
-        // "this exact call happened to create the row". A student who closed the
-        // tab mid-onboarding comes back to an EXISTING row (onboardingCompleted
-        // still false), and must see the screen again, not land straight on the
-        // dashboard with the placeholder "새로운 학생" name. See CareerContext.jsx's
-        // boot() (this same check runs again there for the already-has-a-token path).
-        boolean newUser = !Boolean.TRUE.equals(user.getOnboardingCompleted());
         return IdentifyResponse.builder()
-                .token(token)
+                .token(jwtService.generateToken(user.getId()))
                 .user(UserResponse.from(user))
-                .newUser(newUser)
+                .newUser(false)
                 .build();
     }
 
-    private StudentUser provisionNewStudent(IdentifyRequest request) {
+    private StudentUser provisionNewStudent(CompleteSignupRequest request) {
         StudentUser newUser = StudentUser.builder()
                 .universityCode(request.getUniversityCode())
                 .externalUserId(request.getExternalUserId())
-                .name(request.getName() != null ? request.getName() : "새로운 학생")
-                .major(request.getMajor())
-                .grade(request.getGrade() != null ? request.getGrade() : 1)
-                .desiredJob(request.getDesiredJob())
+                .name(request.getName())
+                .avatarGender(request.getAvatarGender())
+                .grade(1)
                 .level(STARTING_LEVEL)
                 .currentExp(STARTING_EXP)
                 .nextLevelExp(STARTING_LEVEL * 250)
-                .onboardingCompleted(false) // stays false until the onboarding screen submits — see UserService#completeOnboarding
                 .build();
         userMapper.insert(newUser); // populates newUser.id via useGeneratedKeys
 

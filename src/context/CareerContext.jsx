@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useEffect, useState } from 'react';
+import { createContext, useContext, useCallback, useEffect, useRef, useState } from 'react';
 import * as api from '../api/career.js';
 import { ApiError } from '../api/client.js';
 import { didAvatarEvolve, getAvatarStage } from '../config/avatarEvolution.js';
@@ -30,6 +30,10 @@ let toastSeq = 1;
 export function CareerProvider({ children }) {
   const theme = useTheme();
   const { setAvatarGender } = useAvatarGender();
+  // Identity pair for a not-yet-created account, held across the onboarding
+  // screen so its submit (completeSignup) can carry them — a ref, not state,
+  // since nothing needs to re-render off this, it's just plumbing. See boot().
+  const pendingSignupRef = useRef(null);
 
   const [user, setUser] = useState(null);
   const [skills, setSkills] = useState(null);
@@ -73,36 +77,25 @@ export function CareerProvider({ children }) {
           return;
         }
 
-        const identified = await api.identify({
-          universityCode: theme.code,
-          externalUserId,
-          name: manualIdentify?.name || params.get('studentName') || undefined,
-        });
-        setToken(identified.token);
+        const identified = await api.identify({ universityCode: theme.code, externalUserId });
 
         if (identified.newUser) {
-          // Fresh account — let the student pick a real nickname/avatar
-          // before ever seeing the dashboard, instead of silently landing on
-          // provisioning defaults ("새로운 학생", FEMALE) they never chose.
-          // completeOnboarding() below picks the boot flow back up.
-          setUser(identified.user);
+          // No account exists yet, and identify() didn't create one (see
+          // AuthService — a StudentUser row is only ever created by
+          // completeSignup(), once the student actually presses 시작하기).
+          // Hold onto the identity pair for that submit and show the picker
+          // instead of ever touching getDashboard() with no token to send.
+          pendingSignupRef.current = { universityCode: theme.code, externalUserId };
+          setUser({ name: manualIdentify?.name || params.get('studentName') || '' });
           setPhase('onboarding');
           return;
         }
+
+        setToken(identified.token);
       }
 
       const dashboard = await api.getDashboard();
       setUser(dashboard.user);
-
-      // Covers the student who already has a saved token (e.g. closed the tab
-      // mid-onboarding on a previous visit, so identify() above never even ran
-      // this time) but never actually finished onboarding — send them back to
-      // the same screen instead of dumping them on the dashboard as "새로운 학생".
-      if (dashboard.user.onboardingCompleted === false) {
-        setPhase('onboarding');
-        return;
-      }
-
       setSkills(dashboard.skills);
       setQuests(dashboard.quests);
       setBadges(dashboard.badges);
@@ -116,11 +109,16 @@ export function CareerProvider({ children }) {
     }
   }, [theme.code, setAvatarGender]);
 
-  // Onboarding screen's submit — saves the chosen name/avatar, then continues
-  // exactly where boot() would have gone next (fetch the rest of the dashboard).
+  // Onboarding screen's submit — this is what actually creates the account
+  // (see AuthService#completeSignup), then continues exactly where boot()
+  // would have gone next for a returning student (fetch the rest of the
+  // dashboard). Throws on failure so OnboardingScreen's own form stays open
+  // and shows the error, instead of silently stranding the student.
   const completeOnboarding = useCallback(async (name, avatarGender) => {
-    const updatedUser = await api.completeOnboarding({ name, avatarGender });
-    setUser(updatedUser);
+    const pending = pendingSignupRef.current;
+    const identified = await api.completeSignup({ ...pending, name, avatarGender });
+    setToken(identified.token);
+    setUser(identified.user);
     setAvatarGender(avatarGender);
     setPhase('loading');
     try {

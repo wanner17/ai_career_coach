@@ -25,7 +25,6 @@ public class UserResponse {
     private String avatarFrame;
     private String avatarSticker;
     private String avatarGender;
-    private Boolean onboardingCompleted;
 
     public static UserResponse from(StudentUser u) {
         return UserResponse.builder()
@@ -41,7 +40,6 @@ public class UserResponse {
                 .avatarFrame(u.getAvatarFrame())
                 .avatarSticker(u.getAvatarSticker())
                 .avatarGender(u.getAvatarGender())
-                .onboardingCompleted(u.getOnboardingCompleted())
                 .build();
     }
 }

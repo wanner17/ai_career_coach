@@ -112,8 +112,18 @@ export async function apiPostStream(path, body, onEvent) {
       let eventName = 'message';
       const dataLines = [];
       for (const line of frame.split('\n')) {
-        if (line.startsWith('event:')) eventName = line.slice(6).trim();
-        else if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
+        if (line.startsWith('event:')) {
+          eventName = line.slice(6).trim(); // event names are plain identifiers — no meaningful whitespace to preserve
+        } else if (line.startsWith('data:')) {
+          // SSE spec: strip at most ONE leading space after "data:" (the conventional
+          // wire separator), never .trim() the whole value — a chunk's actual content
+          // can legitimately BE a leading/trailing space (that's exactly where OpenAI's
+          // streamed deltas put word-boundary spaces, e.g. "안녕" then " 하세요"), and
+          // trimming those away is what glued every word together with no spacing.
+          let value = line.slice(5);
+          if (value.startsWith(' ')) value = value.slice(1);
+          dataLines.push(value);
+        }
       }
       if (dataLines.length > 0) onEvent(eventName, dataLines.join('\n'));
     }

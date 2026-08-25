@@ -16,7 +16,7 @@ export default function LevelUpModal() {
     return (
       <Modal onClose={dismissLevelUp} boxClassName="levelup-box levelup-box--evolution">
         <div className="levelup-emoji">✨</div>
-        <h3>AVATAR EVOLUTION</h3>
+        <h3>아바타 진화</h3>
         <div className="levelup-transition">
           <span>Lv.{fromLevel}</span>
           <span className="arrow">→</span>

@@ -35,9 +35,4 @@ public interface UserMapper {
                         @Param("major") String major,
                         @Param("grade") int grade,
                         @Param("desiredJob") String desiredJob);
-
-    /** Backs the new-account onboarding screen — nickname + avatar style only. */
-    void updateOnboarding(@Param("id") Long id,
-                           @Param("name") String name,
-                           @Param("avatarGender") String avatarGender);
 }

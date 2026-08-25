@@ -34,12 +34,13 @@ public class SchemaMigrationRunner implements ApplicationRunner {
         // account onboarding screen (see UserController#completeOnboarding); defaults to
         // FEMALE for any row created before this column existed.
         addColumnIfMissing("careermate_student_user", "avatar_gender", "VARCHAR(10) NOT NULL DEFAULT 'FEMALE'");
-        // DEFAULT TRUE here on purpose — this backfills every row that already
-        // existed before onboarding was a thing as "already done", so returning
-        // students never get sent back through it. AuthService.provisionNewStudent
-        // explicitly inserts FALSE for every genuinely new row going forward;
-        // the column default only ever applies to these old rows.
-        addColumnIfMissing("careermate_student_user", "onboarding_completed", "BOOLEAN NOT NULL DEFAULT TRUE");
+        // onboarding_completed briefly lived here (a flag for "row exists but
+        // student hasn't finished the onboarding screen yet") — dropped once
+        // AuthService moved to never creating the row until 시작하기 is actually
+        // pressed (see AuthService#completeSignup), which makes that state
+        // impossible by construction. Left as a stray column on any DB this
+        // already ran against — harmless, nothing reads it (same call as the
+        // careermate_quest columns above).
         // careermate_quest.skill_target/skill_points from an earlier 능력치
         // design (quest completion → skill bump) were reverted — 능력치 now
         // grows from real feature usage instead (AiChatService/

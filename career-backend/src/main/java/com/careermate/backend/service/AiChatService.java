@@ -404,6 +404,12 @@ public class AiChatService {
         restTemplate.execute(OPENAI_URL, HttpMethod.POST, req -> {
             req.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             req.getHeaders().setBearerAuth(apiKey);
+            // Forces a fresh TCP connection instead of reusing one from the JDK's
+            // keep-alive pool — a pooled connection OpenAI (or something between us
+            // and it) has quietly closed shows up as exactly the intermittent
+            // "works the first call, dies partway through the next" pattern this
+            // was chasing (ERR_INCOMPLETE_CHUNKED_ENCODING on the 2nd/3rd turn).
+            req.getHeaders().set("Connection", "close");
             objectMapper.writeValue(req.getBody(), body);
         }, resp -> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(resp.getBody(), StandardCharsets.UTF_8))) {

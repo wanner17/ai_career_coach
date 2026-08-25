@@ -10,13 +10,15 @@ export const getUniversity = (code) => apiGet(`/api/career/university/${code}`);
 // career-backend's AuthService.
 export const identify = (payload) => apiPost('/api/auth/identify', payload);
 
+// 온보딩 화면(닉네임/아바타 선택) 제출 — 신규 계정은 이 호출이 있어야 실제로
+// 생성됨 (identify()는 신규면 계정을 안 만들고 newUser:true만 알려줌).
+// See CareerContext.jsx's 'onboarding' phase.
+export const completeSignup = (payload) => apiPost('/api/auth/complete-signup', payload);
+
 export const getUser = () => apiGet('/api/career/user/me');
 export const getDashboard = () => apiGet('/api/career/dashboard/me');
 export const updateAvatar = (payload) => apiPut('/api/career/user/me/avatar', payload);
 export const updateProfile = (payload) => apiPut('/api/career/user/me/profile', payload);
-
-// 신규 계정 첫 진입 화면(닉네임/아바타 선택) — see CareerContext's 'onboarding' phase.
-export const completeOnboarding = (payload) => apiPut('/api/career/user/me/onboarding', payload);
 
 export const getQuests = () => apiGet('/api/career/quests');
 export const completeQuest = (questId) => apiPost(`/api/career/quests/${questId}/complete`);

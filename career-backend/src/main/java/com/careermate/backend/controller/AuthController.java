@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.careermate.backend.dto.request.CompleteSignupRequest;
 import com.careermate.backend.dto.request.IdentifyRequest;
 import com.careermate.backend.dto.response.IdentifyResponse;
 import com.careermate.backend.service.AuthService;
@@ -24,5 +25,11 @@ public class AuthController {
     @PostMapping("/identify")
     public IdentifyResponse identify(@Valid @RequestBody IdentifyRequest request) {
         return authService.identify(request);
+    }
+
+    /** Onboarding screen's submit — the only endpoint that ever creates a StudentUser row. */
+    @PostMapping("/complete-signup")
+    public IdentifyResponse completeSignup(@Valid @RequestBody CompleteSignupRequest request) {
+        return authService.completeSignup(request);
     }
 }
