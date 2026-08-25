@@ -50,13 +50,15 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(
                         (request, response, authException) -> response.sendError(HttpStatus.UNAUTHORIZED.value())))
                 .authorizeHttpRequests(auth -> auth
-                        // Tomcat re-dispatches to /error (as an ERROR-type request) whenever a
-                        // request throws mid-handling — e.g. the AI chat stream's SseEmitter
-                        // failing partway through. Without this, that dispatch is itself
-                        // subject to the .anyRequest().authenticated() rule below, gets
-                        // rejected, and its AccessDeniedException masks whatever the real
-                        // underlying exception was in the server log.
-                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        // Tomcat re-dispatches internally whenever a request throws mid-handling
+                        // — normally as an ERROR forward, but once the response is already
+                        // committed (true mid-stream for the AI chat SSE endpoint: headers +
+                        // some chunks already flushed to the client), it falls back to an
+                        // INCLUDE instead (see StandardHostValve#custom). Without both permitted,
+                        // that re-dispatch is itself subject to .anyRequest().authenticated()
+                        // below, gets rejected, and its AccessDeniedException masks whatever the
+                        // real underlying exception was in the server log.
+                        .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.INCLUDE).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CORS preflight carries no auth header
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/career/university/**").permitAll()
