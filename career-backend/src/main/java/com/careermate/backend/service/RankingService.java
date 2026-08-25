@@ -97,14 +97,18 @@ public class RankingService {
         };
     }
 
-    /** "김미래" -> "김**". A 1-character name has nothing to mask, shown as-is. */
+    // 마스킹 잠시 꺼둠 — 필요해지면 아래 주석 풀고 return name; 줄만 지우면 됨.
+    // /** "김미래" -> "김**". A 1-character name has nothing to mask, shown as-is. */
+    // private String maskName(String name) {
+    //     if (name == null || name.isBlank()) {
+    //         return "익명";
+    //     }
+    //     if (name.length() <= 1) {
+    //         return name;
+    //     }
+    //     return name.charAt(0) + "*".repeat(name.length() - 1);
+    // }
     private String maskName(String name) {
-        if (name == null || name.isBlank()) {
-            return "익명";
-        }
-        if (name.length() <= 1) {
-            return name;
-        }
-        return name.charAt(0) + "*".repeat(name.length() - 1);
+        return name;
     }
 }

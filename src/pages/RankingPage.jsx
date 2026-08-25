@@ -14,6 +14,10 @@ const PERIODS = [
   { key: 'MONTH', label: '이번 달' },
 ];
 
+// 백엔드가 아직 옛 응답 형식이거나(재배포 타이밍 어긋남) 값이 없을 때 toLocaleString()에서
+// 그대로 죽지 않도록 하는 방어용 포맷터 — 0으로 대체.
+const fmt = (n) => (n ?? 0).toLocaleString();
+
 function RankAvatar({ level, avatarGender, className = '' }) {
   return (
     <div className={`ranking-avatar ${className}`}>
@@ -22,29 +26,31 @@ function RankAvatar({ level, avatarGender, className = '' }) {
   );
 }
 
-function PodiumCard({ entry }) {
+// 다른 학생은 서버가 마스킹한 이름(maskedName)을 그대로 보여주지만, 본인 행은
+// 이미 알고 있는 자기 이름이라 마스킹할 이유가 없다 — myName이 오면 그걸 우선한다.
+function PodiumCard({ entry, myName }) {
   return (
-    <article className={`ranking-podium ranking-podium--${entry.rank}`}>
+    <article className={`ranking-podium ranking-podium--${entry.rank} ${entry.isMe ? 'is-me' : ''}`}>
       <span className="ranking-podium__medal">{MEDAL[entry.rank]}</span>
       <RankAvatar level={entry.level} avatarGender={entry.avatarGender} className="ranking-podium__avatar" />
-      <strong className="ranking-podium__name">{entry.maskedName}</strong>
-      <span className="ranking-podium__exp">{entry.exp.toLocaleString()} EXP</span>
+      <strong className="ranking-podium__name">{entry.isMe && myName ? myName : entry.maskedName}{entry.isMe && <span className="ranking-row__me-tag">나</span>}</strong>
+      <span className="ranking-podium__exp">{fmt(entry.exp)} EXP</span>
     </article>
   );
 }
 
-function TableRow({ entry }) {
+function TableRow({ entry, myName }) {
   return (
     <div className={`ranking-row ${entry.isMe ? 'is-me' : ''}`}>
       <span className={`ranking-row__rank ${entry.rank <= 3 ? `is-top${entry.rank}` : ''}`}>{entry.rank}</span>
       <div className="ranking-row__who">
         <RankAvatar level={entry.level} avatarGender={entry.avatarGender} className="ranking-row__avatar" />
-        <strong>{entry.maskedName}</strong>
+        <strong>{entry.isMe && myName ? myName : entry.maskedName}</strong>
         {entry.isMe && <span className="ranking-row__me-tag">나</span>}
       </div>
       <span className="ranking-row__grade">{entry.grade ? `${entry.grade}학년` : '-'}</span>
       <span className="ranking-row__level">Lv.{entry.level}</span>
-      <span className="ranking-row__exp">{entry.exp.toLocaleString()} EXP</span>
+      <span className="ranking-row__exp">{fmt(entry.exp)} EXP</span>
     </div>
   );
 }
@@ -85,17 +91,17 @@ export default function RankingPage({ navigate }) {
               <RankAvatar level={user.level} avatarGender={avatarGender} className="ranking-me-card__avatar" />
               <div className="ranking-me-card__body">
                 <div className="ranking-me-card__name-row">
-                  <strong>{data.me?.maskedName ?? user.name}</strong>
+                  <strong>{user.name}</strong>
                   {data.me && <span className="ranking-me-card__rank-pill">🛡 {data.me.rank}위</span>}
                 </div>
                 <div className="ranking-me-card__level-row">
                   <b>Lv.{user.level}</b>
-                  <span>{user.currentExp.toLocaleString()} EXP</span>
+                  <span>{fmt(user.currentExp)} EXP</span>
                 </div>
                 <div className="ranking-me-card__progress">
-                  <span>다음 레벨까지 {(user.nextLevelExp - user.currentExp).toLocaleString()} EXP</span>
+                  <span>다음 레벨까지 {fmt(user.nextLevelExp - user.currentExp)} EXP</span>
                   <div className="progress"><i style={{ width: `${expPercent}%` }} /></div>
-                  <small>{user.currentExp.toLocaleString()} / {user.nextLevelExp.toLocaleString()} EXP</small>
+                  <small>{fmt(user.currentExp)} / {fmt(user.nextLevelExp)} EXP</small>
                 </div>
               </div>
             </article>
@@ -103,7 +109,7 @@ export default function RankingPage({ navigate }) {
             <article className="card ranking-stat-card">
               <span className="ranking-stat-card__icon">📈</span>
               <span className="ranking-stat-card__label">이번 주 획득 EXP</span>
-              <strong>{data.weeklyExpGained.toLocaleString()}</strong>
+              <strong>{fmt(data.weeklyExpGained)}</strong>
               <span className="ranking-stat-card__unit">EXP</span>
             </article>
 
@@ -119,7 +125,7 @@ export default function RankingPage({ navigate }) {
             <section className="ranking-podium-section">
               <h2>TOP 3</h2>
               <div className="ranking-podium-row">
-                {podium.map((entry) => <PodiumCard key={entry.rank} entry={entry} />)}
+                {podium.map((entry) => <PodiumCard key={entry.rank} entry={entry} myName={user.name} />)}
               </div>
             </section>
           )}
@@ -144,9 +150,9 @@ export default function RankingPage({ navigate }) {
               <span>순위</span><span>이름</span><span>학년</span><span>레벨</span><span>EXP</span>
             </div>
             <div className="ranking-list">
-              {data.entries.map((entry) => <TableRow key={entry.rank} entry={entry} />)}
+              {data.entries.map((entry) => <TableRow key={entry.rank} entry={entry} myName={user.name} />)}
               {data.entries.length === 0 && <p className="jobs-empty">아직 순위 데이터가 없습니다.</p>}
-              {data.me && !meInTop && <TableRow entry={data.me} />}
+              {data.me && !meInTop && <TableRow entry={data.me} myName={user.name} />}
             </div>
           </article>
         </>

@@ -32,7 +32,7 @@ public class RankingResponse {
     @AllArgsConstructor
     public static class Entry {
         private int rank;
-        /** First character kept, rest masked (e.g. "김미래" -> "김**") — see RankingService#maskName. */
+        /** Currently the real name, unmasked — RankingService#maskName's masking is commented out for now. */
         private String maskedName;
         private String major;
         private Integer grade;
