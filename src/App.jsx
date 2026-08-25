@@ -43,20 +43,36 @@ const ROUTES = {
   '/admin/settings': AdminSettings,
 };
 
+// Vite exposes whatever `base` it was built with here (see vite.config.js) —
+// '/' for a normal root deployment, '/career/' for a subpath one (a
+// university reverse-proxying /career/** to this app — see nginx.conf).
+// ROUTES below are all root-relative ('/quest', ...), so every read of the
+// real browser pathname strips this prefix, and every write adds it back —
+// keeping the router itself, and every navigate() caller, oblivious to
+// whether a subpath is in play at all.
+const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, ''); // '' at root, '/career' under a subpath
+
+function toAppPath(browserPathname) {
+  if (BASE_PATH && browserPathname.startsWith(BASE_PATH)) {
+    return browserPathname.slice(BASE_PATH.length) || '/';
+  }
+  return browserPathname;
+}
+
 // Tiny pathname router — no react-router dependency needed for ~7 routes.
 // Keeps the university query string intact across navigate() calls.
 function usePathname() {
-  const [pathname, setPathname] = useState(window.location.pathname);
+  const [pathname, setPathname] = useState(() => toAppPath(window.location.pathname));
 
   useEffect(() => {
-    const onPopState = () => setPathname(window.location.pathname);
+    const onPopState = () => setPathname(toAppPath(window.location.pathname));
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
   const navigate = useCallback((path) => {
-    if (path === window.location.pathname) return;
-    window.history.pushState({}, '', path + window.location.search);
+    if (path === toAppPath(window.location.pathname)) return;
+    window.history.pushState({}, '', BASE_PATH + path + window.location.search);
     setPathname(path);
   }, []);
 

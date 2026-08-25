@@ -9,6 +9,13 @@ RUN npm ci
 COPY . .
 ARG VITE_API_BASE=""
 ENV VITE_API_BASE=${VITE_API_BASE}
+# Set only when this build is served under a subpath (e.g. a university site
+# reverse-proxying /career/** to this app instead of hosting it at its own
+# root — see nginx.conf's comment on that setup) — asset references and the
+# in-app router both need the prefix baked in at build time. Leave unset for
+# a normal root deployment; nothing here changes behavior in that case.
+ARG VITE_BASE_PATH="/"
+ENV VITE_BASE_PATH=${VITE_BASE_PATH}
 RUN npm run build
 
 # Runtime stage — static files + nginx only, no Node left in the final image.
