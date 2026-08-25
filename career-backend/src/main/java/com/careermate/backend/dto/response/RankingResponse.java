@@ -8,10 +8,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * Response for GET /api/career/ranking — see RankingService. `entries` is the
- * top slice (Level desc, then EXP desc) within the caller's own university;
- * `me` is the caller's own row regardless of whether it made that slice, so
- * "내 순위" always has something to show even far outside the top of the board.
+ * Response for GET /api/career/ranking?period=ALL|WEEK|MONTH — see
+ * RankingService. `entries` is the top slice for the requested period
+ * (EXP earned in that window, descending); `me` is the caller's own row
+ * regardless of whether it made that slice, so "내 순위" always has
+ * something to show even far outside the top of the board. `weeklyExpGained`
+ * is always this-week's number regardless of which period was requested —
+ * it backs the dashboard-style stat card, not the board itself.
  */
 @Getter
 @Builder
@@ -21,6 +24,7 @@ public class RankingResponse {
     private List<Entry> entries;
     private Entry me;
     private int totalStudents;
+    private int weeklyExpGained;
 
     @Getter
     @Builder
@@ -33,7 +37,9 @@ public class RankingResponse {
         private String major;
         private Integer grade;
         private int level;
-        private int currentExp;
+        private String avatarGender;
+        /** EXP earned within the requested period (all-time for ALL, this-week's for WEEK, ...). */
+        private int exp;
         private boolean isMe;
     }
 }

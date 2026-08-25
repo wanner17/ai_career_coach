@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.careermate.backend.mapper.RankingMapper">
+
+    <!-- LEFT JOIN so a student with zero completions this period still shows up
+         (periodExp 0), not disappears from the board entirely. -->
+    <select id="findRanking" resultType="com.careermate.backend.domain.RankingRow">
+        SELECT
+            u.id AS id,
+            u.name AS name,
+            u.major AS major,
+            u.grade AS grade,
+            u.level AS level,
+            u.avatar_gender AS avatarGender,
+            COALESCE(SUM(CASE WHEN uq.completed = TRUE AND uq.completed_at &gt;= #{from} THEN q.exp ELSE 0 END), 0) AS periodExp
+        FROM careermate_student_user u
+        LEFT JOIN careermate_user_quest uq ON uq.user_id = u.id
+        LEFT JOIN careermate_quest q ON q.id = uq.quest_id
+        WHERE u.university_code = #{universityCode}
+        GROUP BY u.id, u.name, u.major, u.grade, u.level, u.avatar_gender
+        ORDER BY periodExp DESC, u.level DESC, u.id ASC
+    </select>
+
+    <select id="sumExpForUser" resultType="int">
+        SELECT COALESCE(SUM(q.exp), 0)
+        FROM careermate_user_quest uq
+        JOIN careermate_quest q ON q.id = uq.quest_id
+        WHERE uq.user_id = #{userId} AND uq.completed = TRUE AND uq.completed_at &gt;= #{from}
+    </select>
+
+</mapper>

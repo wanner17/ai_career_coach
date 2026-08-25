@@ -25,8 +25,9 @@ export const completeQuest = (questId) => apiPost(`/api/career/quests/${questId}
 
 export const getBadges = () => apiGet('/api/career/badges');
 
-// Level 순위 — same university's students only, names masked server-side (see RankingService).
-export const getRanking = () => apiGet('/api/career/ranking');
+// EXP 순위 — same university's students only, names masked server-side (see
+// RankingService). period: 'ALL' | 'WEEK' | 'MONTH'.
+export const getRanking = (period = 'ALL') => apiGet(`/api/career/ranking?period=${period}`);
 
 export const sendAiChat = (message) => apiPost('/api/career/ai/chat', { message });
 
