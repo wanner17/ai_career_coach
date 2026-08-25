@@ -1,7 +1,7 @@
 // One function per career-backend endpoint — see career-backend/README.md for
 // the full contract. userId travels via the JWT (see api/client.js), not as
 // a param here — only /api/auth/identify and the admin endpoints don't need one.
-import { apiGet, apiGetText, apiPost, apiPut, apiDelete } from './client.js';
+import { apiGet, apiGetText, apiPost, apiPostStream, apiPut, apiDelete } from './client.js';
 
 export const getUniversity = (code) => apiGet(`/api/career/university/${code}`);
 
@@ -21,6 +21,10 @@ export const completeQuest = (questId) => apiPost(`/api/career/quests/${questId}
 export const getBadges = () => apiGet('/api/career/badges');
 
 export const sendAiChat = (message) => apiPost('/api/career/ai/chat', { message });
+
+// SSE variant — onEvent(name, dataText) fires per "tool"/"chunk"/"done"/"error"
+// frame as they arrive; see AiChatController#chatStream for the event shapes.
+export const streamAiChat = (message, onEvent) => apiPostStream('/api/career/ai/chat/stream', { message }, onEvent);
 export const getAiChatHistory = (limit = 20) => apiGet(`/api/career/ai/chat/history?limit=${limit}`);
 export const getAiChatInsights = () => apiGet('/api/career/ai/chat/insights');
 

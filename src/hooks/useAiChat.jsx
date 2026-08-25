@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useCareer } from '../context/CareerContext.jsx';
 import { initialChatLog } from '../data/mockChat.js';
 import { skillMeta } from '../data/mockUser.js';
-import { sendAiChat, getAiChatHistory } from '../api/career.js';
+import { streamAiChat, getAiChatHistory } from '../api/career.js';
 
 // Backend sends skillGain as a Korean label (자기소개서, 면접역량, ...) since
 // that's all the toast needs — this maps it back to the skills object's key
@@ -10,11 +10,6 @@ import { sendAiChat, getAiChatHistory } from '../api/career.js';
 const LABEL_TO_SKILL_KEY = Object.fromEntries(Object.entries(skillMeta).map(([key, meta]) => [meta.label, key]));
 
 let msgSeq = 100;
-const MIN_TYPING_MS = 500; // avoids an instant-reply flash on a fast/local backend
-
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 export function formatChatTime(date) {
   return new Intl.DateTimeFormat('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true }).format(date);
@@ -91,25 +86,47 @@ export function useAiChat() {
     setInput('');
     setTyping(true);
 
-    try {
-      const [response] = await Promise.all([sendAiChat(text), delay(MIN_TYPING_MS)]);
-      setMessages((prev) => [...prev, {
-        id: msgSeq++,
-        from: 'ai',
-        text: response.reply,
-        time: formatChatTime(new Date()),
-        recommendedQuest: response.recommendedQuest || null,
-      }]);
+    // The "•••" typing indicator (rendered from `typing`) stands in for however
+    // long round 1's tool-decision + the first streamed token take; the moment
+    // real text starts arriving, it's swapped for the growing bubble itself —
+    // no more artificial MIN_TYPING_MS delay needed, the wait is now real.
+    const aiMsgId = msgSeq++;
+    let started = false;
 
-      // 능력치 정의 v2 — genuinely discussing a topic with the AI coach (not
-      // a quest checkbox) is what grows the matching axis now; see
-      // AiChatService#applyChatSkillBump for the once-per-day cap.
-      if (response.skillGain) {
-        bumpSkill(LABEL_TO_SKILL_KEY[response.skillGain.skillLabel], response.skillGain.points);
-        pushToast(`📈 ${response.skillGain.skillLabel} +${response.skillGain.points}`);
-      }
+    try {
+      await streamAiChat(text, (eventName, dataText) => {
+        if (eventName === 'chunk') {
+          if (!started) {
+            started = true;
+            setTyping(false);
+            setMessages((prev) => [...prev, { id: aiMsgId, from: 'ai', text: '', time: formatChatTime(new Date()) }]);
+          }
+          setMessages((prev) => prev.map((m) => (m.id === aiMsgId ? { ...m, text: m.text + dataText } : m)));
+        } else if (eventName === 'done') {
+          const response = JSON.parse(dataText);
+          setMessages((prev) => prev.map((m) => (m.id === aiMsgId ? { ...m, recommendedQuest: response.recommendedQuest || null } : m)));
+
+          // 능력치 정의 v2 — genuinely discussing a topic with the AI coach (not
+          // a quest checkbox) is what grows the matching axis now; see
+          // AiChatService#applyChatSkillBump for the once-per-day cap.
+          if (response.skillGain) {
+            bumpSkill(LABEL_TO_SKILL_KEY[response.skillGain.skillLabel], response.skillGain.points);
+            pushToast(`📈 ${response.skillGain.skillLabel} +${response.skillGain.points}`);
+          }
+        } else if (eventName === 'error') {
+          throw new Error('AI stream reported an error');
+        }
+        // 'tool' event — no dedicated UI for it yet; the typing dots already cover this gap.
+      });
+
+      if (!started) throw new Error('stream ended with no reply text'); // e.g. model produced only a meta block
     } catch {
-      setMessages((prev) => [...prev, { id: msgSeq++, from: 'ai', text: '⚠ 답변을 가져오지 못했습니다. 잠시 후 다시 시도해주세요.', time: formatChatTime(new Date()) }]);
+      setMessages((prev) => {
+        const errorMsg = { id: aiMsgId, from: 'ai', text: '⚠ 답변을 가져오지 못했습니다. 잠시 후 다시 시도해주세요.', time: formatChatTime(new Date()) };
+        // A bubble may already exist if streaming started then failed partway —
+        // replace it rather than leaving a half-typed message plus an error one.
+        return prev.some((m) => m.id === aiMsgId) ? prev.map((m) => (m.id === aiMsgId ? errorMsg : m)) : [...prev, errorMsg];
+      });
     } finally {
       setTyping(false);
     }

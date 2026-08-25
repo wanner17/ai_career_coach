@@ -1,20 +1,31 @@
 package com.careermate.backend.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.careermate.backend.domain.ChatMessage;
 import com.careermate.backend.domain.Quest;
@@ -65,6 +76,16 @@ import lombok.extern.slf4j.Slf4j;
 public class AiChatService {
 
     private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+
+    /**
+     * Streaming round's plain-text answer / structured-metadata separator —
+     * control chars, not real Korean punctuation, so it can't collide with
+     * anything the model would naturally write. See streamFinalAnswer().
+     */
+    private static final String META_DELIMITER = "\n<<<CM_META>>>\n";
+
+    /** One thread per in-flight streamed chat turn — MVP traffic, not worth a bounded pool. */
+    private final ExecutorService streamExecutor = Executors.newCachedThreadPool();
 
     /** Prior turns (both roles combined) replayed back to the model for continuity. */
     private static final int HISTORY_TURNS = 10;
@@ -155,7 +176,7 @@ public class AiChatService {
         Collections.reverse(chronological); // findRecentForUser is most-recent-first; the model wants oldest-first
 
         List<Map<String, Object>> messages = new ArrayList<>();
-        messages.add(Map.of("role", "system", "content", buildSystemPrompt(user, skills, incompleteQuests, aceService.isConfigured())));
+        messages.add(Map.of("role", "system", "content", buildSystemPrompt(user, skills, incompleteQuests, aceService.isConfigured(), false)));
         chronological.forEach(m -> messages.add(Map.of("role", m.getRole(), "content", m.getMessage())));
         messages.add(Map.of("role", "user", "content", message));
 
@@ -200,6 +221,217 @@ public class AiChatService {
                         .build())
                 .skillGain(skillGain)
                 .build();
+    }
+
+    /**
+     * SSE variant of reply() — same context building + tool-decision round
+     * (round 1, unchanged, still one blocking call), but the final answer
+     * (round 2) is streamed token-by-token to the client instead of waited
+     * for as one blob. Runs on streamExecutor so the controller can return
+     * the SseEmitter to Spring immediately; everything past this point
+     * happens off the request thread.
+     *
+     * apiKey is checked synchronously (before the emitter exists) so a
+     * missing key still surfaces as a normal 503 like reply() does, instead
+     * of a half-open SSE stream that immediately errors.
+     */
+    public SseEmitter replyStream(Long userId, String message) {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new ExternalServiceException(HttpStatus.SERVICE_UNAVAILABLE, "AI 상담 기능이 아직 설정되지 않았습니다. (OPENAI_API_KEY 미설정)");
+        }
+        SseEmitter emitter = new SseEmitter(120_000L); // generous — covers a tool-call round + a full streamed answer
+        streamExecutor.execute(() -> runStream(userId, message, emitter));
+        return emitter;
+    }
+
+    private void runStream(Long userId, String message, SseEmitter emitter) {
+        try {
+            StudentUser user = userMapper.findById(userId);
+            SkillScore skills = skillMapper.findByUserId(userId);
+            List<Quest> incompleteQuests = questMapper.findAllForUser(userId).stream()
+                    .filter(q -> !Boolean.TRUE.equals(q.getCompleted()))
+                    .limit(5)
+                    .toList();
+
+            List<ChatMessage> chronological = new ArrayList<>(chatLogMapper.findRecentForUser(userId, HISTORY_TURNS));
+            Collections.reverse(chronological);
+
+            List<Map<String, Object>> messages = new ArrayList<>();
+            messages.add(Map.of("role", "system", "content", buildSystemPrompt(user, skills, incompleteQuests, aceService.isConfigured(), false)));
+            chronological.forEach(m -> messages.add(Map.of("role", m.getRole(), "content", m.getMessage())));
+            messages.add(Map.of("role", "user", "content", message));
+
+            // Round 1 — identical to reply()'s: decide whether a tool is needed. Its own
+            // JSON-envelope content (if it answered directly, no tool) is discarded on
+            // purpose — round 2 below always regenerates the visible answer, this time
+            // in streaming-friendly plain-text-plus-trailer form (see buildSystemPrompt's
+            // streaming branch), so the client only ever sees text meant to be streamed.
+            JsonNode firstMessage = callOpenAi(messages, true).path("choices").path(0).path("message");
+            JsonNode toolCalls = firstMessage.path("tool_calls");
+            if (toolCalls.isArray() && !toolCalls.isEmpty()) {
+                emitToolNotice(emitter, toolCalls);
+                messages.add(assistantToolCallMessage(firstMessage, toolCalls));
+                for (JsonNode toolCall : toolCalls) {
+                    messages.add(toolResultMessage(toolCall));
+                }
+            }
+            // Swap in the streaming-mode system prompt for round 2 — same student context,
+            // different (non-JSON) output-format instructions at the tail.
+            messages.set(0, Map.of("role", "system", "content", buildSystemPrompt(user, skills, incompleteQuests, aceService.isConfigured(), true)));
+
+            StreamResult result = streamFinalAnswer(messages, emitter);
+            if (result.reply.isBlank()) {
+                throw new ExternalServiceException(HttpStatus.BAD_GATEWAY, "AI 응답을 해석하지 못했습니다.");
+            }
+
+            Quest recommended = result.recommendedQuestId == null ? null : incompleteQuests.stream()
+                    .filter(q -> q.getId().equals(result.recommendedQuestId))
+                    .findFirst().orElse(null);
+            String topic = TOPICS.contains(result.topic) ? result.topic : null;
+
+            persist(userId, "user", message, topic);
+            persist(userId, "assistant", result.reply, null);
+            SkillGain skillGain = applyChatSkillBump(userId, topic);
+
+            AiChatResponse done = AiChatResponse.builder()
+                    .reply(result.reply)
+                    .recommendedQuest(recommended == null ? null : AiChatResponse.RecommendedQuest.builder()
+                            .id(recommended.getId())
+                            .title(recommended.getName())
+                            .exp(recommended.getExp())
+                            .build())
+                    .skillGain(skillGain)
+                    .build();
+            emitter.send(SseEmitter.event().name("done").data(done, MediaType.APPLICATION_JSON));
+            emitter.complete();
+        } catch (Exception e) {
+            log.warn("AI chat stream failed for user {}", userId, e);
+            try {
+                emitter.send(SseEmitter.event().name("error").data(Map.of("message", "답변 생성 중 오류가 발생했습니다."), MediaType.APPLICATION_JSON));
+            } catch (IOException ignored) {
+                // client already gone — nothing left to notify
+            }
+            emitter.completeWithError(e);
+        }
+    }
+
+    /** Best-effort UX touch (e.g. "학교 자료 검색 중..." on the client) — never worth failing the turn over. */
+    private void emitToolNotice(SseEmitter emitter, JsonNode toolCalls) {
+        try {
+            List<String> names = new ArrayList<>();
+            toolCalls.forEach(tc -> names.add(tc.path("function").path("name").asText()));
+            emitter.send(SseEmitter.event().name("tool").data(Map.of("tools", names), MediaType.APPLICATION_JSON));
+        } catch (IOException e) {
+            log.debug("tool notice send failed", e);
+        }
+    }
+
+    /**
+     * Streams round 2 from OpenAI, forwarding plain-text deltas to the client
+     * as they arrive, then parses out the trailing META_DELIMITER + JSON
+     * block once the stream ends. A hold-back window the size of the
+     * delimiter is always kept unsent, so a delimiter split across two
+     * network chunks can never leak partway into the visible chat bubble —
+     * once found, its start becomes the hard ceiling on what gets flushed.
+     * Falls back to "everything is reply text" if the model ever skips the
+     * trailer, same spirit as reply()'s parseModelOutput catch-block.
+     */
+    private StreamResult streamFinalAnswer(List<Map<String, Object>> messages, SseEmitter emitter) {
+        StringBuilder full = new StringBuilder();
+        AtomicInteger sentUpTo = new AtomicInteger(0);
+        int holdBack = META_DELIMITER.length() - 1;
+
+        streamOpenAiCompletion(messages, delta -> {
+            full.append(delta);
+            int delimIdx = full.indexOf(META_DELIMITER);
+            int safeEnd = delimIdx >= 0 ? delimIdx : Math.max(sentUpTo.get(), full.length() - holdBack);
+            if (safeEnd > sentUpTo.get()) {
+                String chunk = full.substring(sentUpTo.get(), safeEnd);
+                sentUpTo.set(safeEnd);
+                try {
+                    emitter.send(SseEmitter.event().name("chunk").data(chunk));
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }
+        });
+
+        String fullText = full.toString();
+        int delimIdx = fullText.indexOf(META_DELIMITER);
+        StreamResult result = new StreamResult();
+        if (delimIdx < 0) {
+            result.reply = fullText;
+            flushRemainder(emitter, fullText, sentUpTo);
+            return result;
+        }
+
+        result.reply = fullText.substring(0, delimIdx);
+        flushRemainder(emitter, result.reply, sentUpTo);
+        String metaJson = fullText.substring(delimIdx + META_DELIMITER.length()).trim();
+        try {
+            ModelOutput meta = objectMapper.readValue(metaJson, ModelOutput.class);
+            result.recommendedQuestId = meta.recommendedQuestId;
+            result.topic = meta.topic;
+        } catch (Exception e) {
+            log.warn("failed to parse streamed meta block: {}", metaJson, e);
+        }
+        return result;
+    }
+
+    private void flushRemainder(SseEmitter emitter, String reply, AtomicInteger sentUpTo) {
+        if (sentUpTo.get() >= reply.length()) return;
+        try {
+            emitter.send(SseEmitter.event().name("chunk").data(reply.substring(sentUpTo.get())));
+            sentUpTo.set(reply.length());
+        } catch (IOException e) {
+            log.debug("final chunk flush failed (client likely disconnected)", e);
+        }
+    }
+
+    /**
+     * Raw OpenAI streaming call (stream:true, no response_format/tools) —
+     * reads the SSE response line-by-line off RestTemplate's connection and
+     * hands each text delta to onDelta as it arrives, instead of buffering
+     * the whole completion like callOpenAi() does.
+     */
+    private void streamOpenAiCompletion(List<Map<String, Object>> messages, Consumer<String> onDelta) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("model", model);
+        body.put("messages", messages);
+        body.put("temperature", 0.5);
+        body.put("stream", true);
+
+        restTemplate.execute(OPENAI_URL, HttpMethod.POST, req -> {
+            req.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            req.getHeaders().setBearerAuth(apiKey);
+            objectMapper.writeValue(req.getBody(), body);
+        }, resp -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(resp.getBody(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.isBlank() || !line.startsWith("data:")) continue;
+                    String payload = line.substring(5).trim();
+                    if ("[DONE]".equals(payload)) break;
+                    try {
+                        JsonNode node = objectMapper.readTree(payload);
+                        String delta = node.path("choices").path(0).path("delta").path("content").asText(null);
+                        if (delta != null && !delta.isEmpty()) {
+                            onDelta.accept(delta);
+                        }
+                    } catch (Exception parseErr) {
+                        log.warn("failed to parse OpenAI stream chunk: {}", payload, parseErr);
+                    }
+                }
+            }
+            return null;
+        });
+    }
+
+    /** Round 2's parsed streaming result — same fields reply()'s ModelOutput carries, minus the JSON wrapper. */
+    private static class StreamResult {
+        String reply = "";
+        Long recommendedQuestId;
+        String topic;
     }
 
     /**
@@ -406,7 +638,28 @@ public class AiChatService {
         }
     }
 
-    private String buildSystemPrompt(StudentUser user, SkillScore skills, List<Quest> incompleteQuests, boolean schoolDocsAvailable) {
+    private String buildSystemPrompt(StudentUser user, SkillScore skills, List<Quest> incompleteQuests, boolean schoolDocsAvailable, boolean streaming) {
+        // Streaming round 2 can't use response_format:json_object (that's what makes the
+        // reply un-streamable — the client would see raw JSON syntax typing itself out).
+        // So it gets plain text instead, with the same recommendedQuestId/topic carried
+        // in a JSON line after a delimiter the client never sees — see streamFinalAnswer().
+        String outputFormat = streaming
+                ? """
+                도구를 호출하는 경우가 아니라면, 학생에게 보여줄 답변을 일반 텍스트로 먼저
+                작성하세요 (마크다운이나 JSON 없이 채팅창에 그대로 표시됩니다). 답변을 다 쓴
+                뒤 반드시 새 줄에 아래 구분자만 정확히 쓰고
+                <<<CM_META>>>
+                그 다음 줄에 JSON 한 줄을 쓰세요:
+                {"recommendedQuestId": 정수 또는 null, "topic": "위 7개 중 하나"}
+                답변 본문 안에는 이 구분자나 JSON을 절대 포함하지 마세요."""
+                : """
+                도구를 호출하는 경우가 아니라면 반드시 아래 JSON 형식으로만 응답하세요:
+                {
+                  "reply": "학생에게 보여줄 답변 텍스트",
+                  "recommendedQuestId": 정수 또는 null,
+                  "topic": "위 7개 중 하나"
+                }""";
+
         String questLines = incompleteQuests.isEmpty()
                 ? "(미완료 퀘스트 없음)"
                 : incompleteQuests.stream()
@@ -445,12 +698,7 @@ public class AiChatService {
                 이 메시지의 주제를 다음 중 하나로 분류해 topic에 담으세요:
                 직무역량, 자기소개서, 면접, 기업분석, 취업준비, 진로탐색, 기타
 
-                도구를 호출하는 경우가 아니라면 반드시 아래 JSON 형식으로만 응답하세요:
-                {
-                  "reply": "학생에게 보여줄 답변 텍스트",
-                  "recommendedQuestId": 정수 또는 null,
-                  "topic": "위 7개 중 하나"
-                }
+                %s
                 """.formatted(
                 schoolDocsAvailable
                         ? "\n                학교 고유의 제도, 일정, 신청 방법, 운영시간을 물어보면 — 질문이 짧거나 애매해도,\n                이전 턴에서 비슷한 걸 이미 물어봤어도 — 일반 지식으로 짐작해 답하지 말고 매번\n                먼저 search_school_docs 도구로 학교 자료를 확인한 뒤 그 결과만 근거로 답변하세요.\n                도구가 관련 내용을 못 찾았다고 하면 지어내지 말고 학교 홈페이지 확인을 안내하세요.\n"
@@ -461,7 +709,8 @@ public class AiChatService {
                 (user.getDesiredJob() == null || user.getDesiredJob().isBlank()) ? "미입력" : user.getDesiredJob(),
                 user.getLevel(),
                 skillLine,
-                questLines);
+                questLines,
+                outputFormat);
     }
 
     /** What we ask the model to hand back — see the JSON envelope spelled out in buildSystemPrompt(). */

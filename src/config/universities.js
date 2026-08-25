@@ -24,6 +24,18 @@ export const universities = {
     primaryColorShadow: 'rgba(21, 101, 192, .24)',
     logo: '',
   },
+  EMYJOB: {
+    code: 'EMYJOB',
+    name: 'e-myJob',
+    // e-myjob 사이트 --primary-color (src/main/webapp/css/front/reset.css) 값에 맞춤
+    primaryColor: '#5478ce',
+    primaryColorHover: '#3d5fb0',
+    primaryColorLight: '#eaeffa',
+    primaryColorSoft: '#f5f7fc',
+    primaryColor2: '#7c9adf',
+    primaryColorShadow: 'rgba(84, 120, 206, .24)',
+    logo: '',
+  },
 };
 
 export const DEFAULT_UNIVERSITY = 'SAMPLE';
