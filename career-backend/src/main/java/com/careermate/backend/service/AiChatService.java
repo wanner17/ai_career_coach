@@ -90,7 +90,7 @@ public class AiChatService {
     // (background streamExecutor thread, not the request thread — see
     // replyStream) paces it back down to something legible without adding
     // meaningful latency to the overall reply.
-    private static final long STREAM_CHUNK_DELAY_MS = 25;
+    private static final long STREAM_CHUNK_DELAY_MS = 60;
 
     /** One thread per in-flight streamed chat turn — MVP traffic, not worth a bounded pool. */
     private final ExecutorService streamExecutor = Executors.newCachedThreadPool();
