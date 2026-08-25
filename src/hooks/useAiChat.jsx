@@ -96,12 +96,18 @@ export function useAiChat() {
     try {
       await streamAiChat(text, (eventName, dataText) => {
         if (eventName === 'chunk') {
+          // JSON-encoded on the backend specifically so a delta that starts with a
+          // real space (e.g. "안녕" then " 하세요") survives — a raw leading space
+          // would sit right after "data:" on the wire and get stripped as the SSE
+          // convention's own separator space (see api/client.js's apiPostStream),
+          // eating the real one and gluing words together.
+          const text = JSON.parse(dataText);
           if (!started) {
             started = true;
             setTyping(false);
             setMessages((prev) => [...prev, { id: aiMsgId, from: 'ai', text: '', time: formatChatTime(new Date()) }]);
           }
-          setMessages((prev) => prev.map((m) => (m.id === aiMsgId ? { ...m, text: m.text + dataText } : m)));
+          setMessages((prev) => prev.map((m) => (m.id === aiMsgId ? { ...m, text: m.text + text } : m)));
         } else if (eventName === 'done') {
           const response = JSON.parse(dataText);
           setMessages((prev) => prev.map((m) => (m.id === aiMsgId ? { ...m, recommendedQuest: response.recommendedQuest || null } : m)));

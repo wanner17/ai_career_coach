@@ -90,7 +90,7 @@ public class AiChatService {
     // (background streamExecutor thread, not the request thread — see
     // replyStream) paces it back down to something legible without adding
     // meaningful latency to the overall reply.
-    private static final long STREAM_CHUNK_DELAY_MS = 60;
+    private static final long STREAM_CHUNK_DELAY_MS = 80;
 
     /** One thread per in-flight streamed chat turn — MVP traffic, not worth a bounded pool. */
     private final ExecutorService streamExecutor = Executors.newCachedThreadPool();
@@ -357,7 +357,15 @@ public class AiChatService {
                 String chunk = full.substring(sentUpTo.get(), safeEnd);
                 sentUpTo.set(safeEnd);
                 try {
-                    emitter.send(SseEmitter.event().name("chunk").data(chunk));
+                    // JSON-encoded, not raw text — a chunk that happens to start with
+                    // a real space (OpenAI puts word-boundary spaces at the front of a
+                    // delta, e.g. "안녕" then " 하세요") would otherwise sit right after
+                    // "data:" on the wire, indistinguishable from the SSE convention's
+                    // own separator space; a spec-compliant parser strips that one
+                    // leading space unconditionally (see client.js's apiPostStream),
+                    // eating the real one and gluing words together. Wrapping in quotes
+                    // moves the space inside them, out of stripping range.
+                    emitter.send(SseEmitter.event().name("chunk").data(chunk, MediaType.APPLICATION_JSON));
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -394,7 +402,7 @@ public class AiChatService {
     private void flushRemainder(SseEmitter emitter, String reply, AtomicInteger sentUpTo) {
         if (sentUpTo.get() >= reply.length()) return;
         try {
-            emitter.send(SseEmitter.event().name("chunk").data(reply.substring(sentUpTo.get())));
+            emitter.send(SseEmitter.event().name("chunk").data(reply.substring(sentUpTo.get()), MediaType.APPLICATION_JSON));
             sentUpTo.set(reply.length());
         } catch (IOException e) {
             log.debug("final chunk flush failed (client likely disconnected)", e);
