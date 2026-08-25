@@ -126,7 +126,10 @@ export function useAiChat() {
       });
 
       if (!started) throw new Error('stream ended with no reply text'); // e.g. model produced only a meta block
-    } catch {
+    } catch (err) {
+      // Was silently swallowed before — logged now so a stream failure leaves
+      // an actual trail in the browser console instead of just the fallback bubble.
+      console.error('AI chat stream failed', err);
       setMessages((prev) => {
         const errorMsg = { id: aiMsgId, from: 'ai', text: '⚠ 답변을 가져오지 못했습니다. 잠시 후 다시 시도해주세요.', time: formatChatTime(new Date()) };
         // A bubble may already exist if streaming started then failed partway —

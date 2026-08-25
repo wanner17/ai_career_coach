@@ -214,7 +214,9 @@ public class AiChatService {
         Quest recommended = parsed.recommendedQuestId == null ? null : incompleteQuests.stream()
                 .filter(q -> q.getId().equals(parsed.recommendedQuestId))
                 .findFirst().orElse(null);
-        String topic = TOPICS.contains(parsed.topic) ? parsed.topic : null;
+        // Same List.of(...).contains(null) NPE trap as the streaming path below —
+        // parsed.topic is null whenever the model's JSON omitted/mangled it.
+        String topic = parsed.topic != null && TOPICS.contains(parsed.topic) ? parsed.topic : null;
 
         persist(userId, "user", message, topic);
         persist(userId, "assistant", parsed.reply, null);
@@ -295,7 +297,11 @@ public class AiChatService {
             Quest recommended = result.recommendedQuestId == null ? null : incompleteQuests.stream()
                     .filter(q -> q.getId().equals(result.recommendedQuestId))
                     .findFirst().orElse(null);
-            String topic = TOPICS.contains(result.topic) ? result.topic : null;
+            // result.topic is null whenever the model skipped/mangled the trailing
+            // meta block (see streamFinalAnswer's catch) — List.of(...).contains(null)
+            // throws NPE instead of returning false (unlike a plain ArrayList), which
+            // was killing the whole stream right as it should have been wrapping up.
+            String topic = result.topic != null && TOPICS.contains(result.topic) ? result.topic : null;
 
             persist(userId, "user", message, topic);
             persist(userId, "assistant", result.reply, null);
