@@ -15,6 +15,12 @@
         WHERE university_code = #{universityCode} AND external_user_id = #{externalUserId}
     </select>
 
+    <select id="findRankingForUniversity" resultType="com.careermate.backend.domain.StudentUser">
+        SELECT * FROM careermate_student_user
+        WHERE university_code = #{universityCode}
+        ORDER BY level DESC, current_exp DESC, id ASC
+    </select>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO careermate_student_user
             (university_code, external_user_id, name, major, grade, desired_job, level, current_exp, next_level_exp, avatar_gender)

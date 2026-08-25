@@ -519,3 +519,29 @@
 .essay-history-score { font-weight: 700; color: var(--career-primary); width: 44px; flex: none; }
 .essay-history-label { flex: 1; color: var(--career-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .essay-history-date { color: var(--career-muted); white-space: nowrap; }
+
+/* ---- 순위 (see pages/RankingPage.jsx) — 같은 대학 학생들끼리의 Level 순위.
+   이름은 서버가 이미 마스킹해서 내려주므로(RankingService#maskName) 여기선
+   그냥 표시만 한다. */
+.ranking-me-card { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; padding: 20px 24px; background: linear-gradient(135deg, var(--career-primary-light), var(--career-primary-soft)); border-color: var(--career-primary-light); }
+.ranking-me-card__label { font-size: 12px; font-weight: 700; color: var(--career-primary-hover); width: 100%; }
+.ranking-me-card__rank { font-size: 28px; font-weight: 900; color: var(--career-primary); }
+.ranking-me-card__detail { margin-left: auto; font-size: 13px; color: var(--career-muted); }
+
+.ranking-list { padding: 8px 20px 18px; }
+.ranking-row { display: grid; grid-template-columns: 40px 1fr 64px 96px; align-items: center; gap: 12px; padding: 14px 4px; border-bottom: 1px solid var(--career-line); }
+.ranking-row:last-child { border-bottom: 0; }
+.ranking-row.is-me { background: var(--career-primary-light); border-radius: 10px; padding-left: 10px; padding-right: 10px; }
+.ranking-row__rank { font-size: 16px; font-weight: 800; text-align: center; color: var(--career-muted); }
+.ranking-row__who { display: flex; flex-direction: column; min-width: 0; }
+.ranking-row__who strong { font-size: 14px; display: flex; align-items: center; gap: 6px; }
+.ranking-row__who span { font-size: 11.5px; color: var(--career-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ranking-row__me-tag { font-size: 10px; font-weight: 800; color: #fff; background: var(--career-primary); border-radius: 99px; padding: 2px 7px; }
+.ranking-row__level { font-size: 13px; font-weight: 800; color: var(--career-primary); text-align: right; }
+.ranking-row__exp { font-size: 12px; color: var(--career-muted); text-align: right; white-space: nowrap; }
+
+@media (max-width: 480px) {
+  .ranking-row { grid-template-columns: 28px 1fr 56px; }
+  .ranking-row__exp { display: none; }
+  .ranking-me-card__detail { margin-left: 0; }
+}

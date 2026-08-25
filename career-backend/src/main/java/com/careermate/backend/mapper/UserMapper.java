@@ -18,6 +18,9 @@ public interface UserMapper {
     StudentUser findByExternalUser(@Param("universityCode") String universityCode,
                                     @Param("externalUserId") String externalUserId);
 
+    /** Same university's students, Level/EXP descending — backs 순위 (see RankingService). */
+    List<StudentUser> findRankingForUniversity(@Param("universityCode") String universityCode);
+
     void insert(StudentUser user);
 
     void updateLevelExp(@Param("id") Long id,

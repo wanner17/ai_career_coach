@@ -25,6 +25,9 @@ export const completeQuest = (questId) => apiPost(`/api/career/quests/${questId}
 
 export const getBadges = () => apiGet('/api/career/badges');
 
+// Level 순위 — same university's students only, names masked server-side (see RankingService).
+export const getRanking = () => apiGet('/api/career/ranking');
+
 export const sendAiChat = (message) => apiPost('/api/career/ai/chat', { message });
 
 // SSE variant — onEvent(name, dataText) fires per "tool"/"chunk"/"done"/"error"

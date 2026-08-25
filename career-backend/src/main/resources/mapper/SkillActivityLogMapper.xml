@@ -7,4 +7,11 @@
         VALUES (#{userId}, #{skill}, #{activityKey}, #{points})
     </insert>
 
+    <select id="existsForSkill" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1 FROM careermate_skill_activity_log
+            WHERE user_id = #{userId} AND skill = #{skill}
+        )
+    </select>
+
 </mapper>

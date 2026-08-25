@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { key: 'quest', icon: '▣', label: '오늘의 퀘스트', path: '/quest', implemented: true },
   { key: 'ai-chat', icon: '◌', label: 'AI 상담', path: '/ai-chat', implemented: true },
   { key: 'growth', icon: '🌱', label: '나의 성장', path: '/growth', implemented: true },
+  { key: 'ranking', icon: '🏆', label: '성장 랭킹', path: '/ranking', implemented: true },
   { key: 'interview', icon: '▻', label: 'AI 모의면접', path: '/interview', implemented: true },
   { key: 'resume', icon: '✎', label: '자기소개서 첨삭', path: '/essay', implemented: true },
   { key: 'company', icon: '⌕', label: '기업분석', path: '/company', implemented: true },

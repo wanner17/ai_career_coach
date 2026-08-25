@@ -12,4 +12,11 @@ public interface SkillActivityLogMapper {
      */
     int tryInsert(@Param("userId") Long userId, @Param("skill") String skill,
             @Param("activityKey") String activityKey, @Param("points") int points);
+
+    /**
+     * Any logged activity at all for this user+skill (any activityKey) — used
+     * to gate a quest's completion on a real, already-tracked signal instead
+     * of trusting the caller. See QuestService#requireVerified.
+     */
+    boolean existsForSkill(@Param("userId") Long userId, @Param("skill") String skill);
 }
