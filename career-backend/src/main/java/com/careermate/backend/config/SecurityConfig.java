@@ -2,6 +2,8 @@ package com.careermate.backend.config;
 
 import java.util.List;
 
+import jakarta.servlet.DispatcherType;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,6 +50,13 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(
                         (request, response, authException) -> response.sendError(HttpStatus.UNAUTHORIZED.value())))
                 .authorizeHttpRequests(auth -> auth
+                        // Tomcat re-dispatches to /error (as an ERROR-type request) whenever a
+                        // request throws mid-handling — e.g. the AI chat stream's SseEmitter
+                        // failing partway through. Without this, that dispatch is itself
+                        // subject to the .anyRequest().authenticated() rule below, gets
+                        // rejected, and its AccessDeniedException masks whatever the real
+                        // underlying exception was in the server log.
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CORS preflight carries no auth header
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/career/university/**").permitAll()
