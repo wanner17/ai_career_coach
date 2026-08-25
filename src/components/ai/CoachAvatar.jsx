@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useAvatarGender } from '../../context/AvatarGenderContext.jsx';
+import { withBase } from '../../utils/publicPath.js';
 
 const IMAGE_BY_GENDER = {
-  FEMALE: '/assets/avatar/ai_coach_female.png',
-  MALE: '/assets/avatar/ai_coach_male.png',
+  FEMALE: withBase('/assets/avatar/ai_coach_female.png'),
+  MALE: withBase('/assets/avatar/ai_coach_male.png'),
 };
 
 // Same "try the image, fall back on failure" shape as layout/BrandLogo.jsx.
