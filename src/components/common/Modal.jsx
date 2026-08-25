@@ -5,8 +5,17 @@ import { useEffect, useRef } from 'react';
 export default function Modal({ onClose, children, boxClassName = '' }) {
   const boxRef = useRef(null);
 
+  // Mount-only — focusing the box every render this effect re-ran would steal
+  // focus back from whatever the user is actively typing in every time. Split
+  // out from the ESC listener below specifically so a caller passing a new
+  // onClose function identity each render (e.g. an inline `() => ...` in a
+  // parent that re-renders on every keystroke — see admin forms) can't
+  // trigger it again after the initial mount.
   useEffect(() => {
     boxRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
     if (!onClose) return;
     const handleKeyDown = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handleKeyDown);
