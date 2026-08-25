@@ -353,6 +353,15 @@ public class AiChatService {
             full.append(delta);
             int delimIdx = full.indexOf(META_DELIMITER);
             int safeEnd = delimIdx >= 0 ? delimIdx : Math.max(sentUpTo.get(), full.length() - holdBack);
+            // Never cut between a UTF-16 surrogate pair (e.g. an emoji like 🎯) —
+            // a lone half-surrogate is invalid Unicode, and Jackson throws while
+            // JSON-encoding it (see the .data(...) call below), which killed the
+            // whole stream the moment the model's answer happened to contain one.
+            // Back the cut off by one so the pair stays intact and goes out together
+            // next round instead.
+            if (safeEnd > sentUpTo.get() && safeEnd < full.length() && Character.isHighSurrogate(full.charAt(safeEnd - 1))) {
+                safeEnd--;
+            }
             if (safeEnd > sentUpTo.get()) {
                 String chunk = full.substring(sentUpTo.get(), safeEnd);
                 sentUpTo.set(safeEnd);
