@@ -93,6 +93,16 @@ export function CareerProvider({ children }) {
 
       const dashboard = await api.getDashboard();
       setUser(dashboard.user);
+
+      // Covers the student who already has a saved token (e.g. closed the tab
+      // mid-onboarding on a previous visit, so identify() above never even ran
+      // this time) but never actually finished onboarding — send them back to
+      // the same screen instead of dumping them on the dashboard as "새로운 학생".
+      if (dashboard.user.onboardingCompleted === false) {
+        setPhase('onboarding');
+        return;
+      }
+
       setSkills(dashboard.skills);
       setQuests(dashboard.quests);
       setBadges(dashboard.badges);

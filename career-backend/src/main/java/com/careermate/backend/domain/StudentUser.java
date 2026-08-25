@@ -29,5 +29,7 @@ public class StudentUser {
     private String avatarSticker;
     /** MALE/FEMALE — see config/avatarEvolution.js; picked once at onboarding. */
     private String avatarGender;
+    /** False from provisioning until the onboarding screen submits — see UserService#completeOnboarding. */
+    private Boolean onboardingCompleted;
     private LocalDateTime createdAt;
 }

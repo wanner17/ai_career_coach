@@ -40,7 +40,7 @@ export default function OnboardingScreen({ universityName, defaultName, onSubmit
   return (
     <div className="career-status-screen">
       <form className="onboarding-box" onSubmit={handleSubmit}>
-        <h2>{universityName}에 오신 걸 환영해요!</h2>
+        <h2>AI 커리어 코치에 오신 걸 환영해요!</h2>
         <p>닉네임과 나만의 아바타 스타일을 골라주세요. 아바타 스타일은 AI상담 페이지에서 언제든 다시 바꿀 수 있어요.</p>
 
         <label className="onboarding-box__name">

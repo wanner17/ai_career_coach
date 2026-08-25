@@ -17,9 +17,9 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO careermate_student_user
-            (university_code, external_user_id, name, major, grade, desired_job, level, current_exp, next_level_exp)
+            (university_code, external_user_id, name, major, grade, desired_job, level, current_exp, next_level_exp, onboarding_completed)
         VALUES
-            (#{universityCode}, #{externalUserId}, #{name}, #{major}, #{grade}, #{desiredJob}, #{level}, #{currentExp}, #{nextLevelExp})
+            (#{universityCode}, #{externalUserId}, #{name}, #{major}, #{grade}, #{desiredJob}, #{level}, #{currentExp}, #{nextLevelExp}, #{onboardingCompleted})
     </insert>
 
     <update id="updateLevelExp">
@@ -42,7 +42,7 @@
 
     <update id="updateOnboarding">
         UPDATE careermate_student_user
-        SET name = #{name}, avatar_gender = #{avatarGender}
+        SET name = #{name}, avatar_gender = #{avatarGender}, onboarding_completed = TRUE
         WHERE id = #{id}
     </update>
 

@@ -34,17 +34,23 @@ public class AuthService {
     @Transactional
     public IdentifyResponse identify(IdentifyRequest request) {
         StudentUser user = userMapper.findByExternalUser(request.getUniversityCode(), request.getExternalUserId());
-        boolean isNewUser = user == null;
 
-        if (isNewUser) {
+        if (user == null) {
             user = provisionNewStudent(request);
         }
 
         String token = jwtService.generateToken(user.getId());
+        // "newUser" really means "still needs the onboarding screen" — not just
+        // "this exact call happened to create the row". A student who closed the
+        // tab mid-onboarding comes back to an EXISTING row (onboardingCompleted
+        // still false), and must see the screen again, not land straight on the
+        // dashboard with the placeholder "새로운 학생" name. See CareerContext.jsx's
+        // boot() (this same check runs again there for the already-has-a-token path).
+        boolean newUser = !Boolean.TRUE.equals(user.getOnboardingCompleted());
         return IdentifyResponse.builder()
                 .token(token)
                 .user(UserResponse.from(user))
-                .newUser(isNewUser)
+                .newUser(newUser)
                 .build();
     }
 
@@ -59,6 +65,7 @@ public class AuthService {
                 .level(STARTING_LEVEL)
                 .currentExp(STARTING_EXP)
                 .nextLevelExp(STARTING_LEVEL * 250)
+                .onboardingCompleted(false) // stays false until the onboarding screen submits — see UserService#completeOnboarding
                 .build();
         userMapper.insert(newUser); // populates newUser.id via useGeneratedKeys
 
