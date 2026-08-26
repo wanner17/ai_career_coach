@@ -173,6 +173,7 @@ public/
 | Dashboard/Quest/MyPage (유저, EXP, 레벨, 퀘스트, 배지) | `GET /api/career/dashboard/me` 등, JWT로 인증 |
 | Quest 완료 | `POST /api/career/quests/{id}/complete` — EXP/레벨업 응답을 그대로 반영. 일부 퀘스트(기업분석/모의면접/자소서)는 실사용 로그가 없으면 서버가 거부함 — `QuestService#requireVerified` 참고 |
 | 순위 | `GET /api/career/ranking` — 같은 대학 학생끼리 Level 기준, 이름은 서버에서 마스킹 |
+| 이력서 첨삭 | `POST /api/career/resume/review` (multipart, PDF/DOCX만 — HWP는 거절) + `GET /api/career/resume/history` — `ResumeReviewService` 참고, EXP/능력치 연동 없음 |
 | AI 상담 | `POST /api/career/ai/chat` (백엔드도 아직 키워드 Mock — 실제 LLM은 2차) |
 | 관리자 Quest CRUD | `/api/admin/quests` (등록/수정/삭제마다 목록 재조회, 인증 없음 — 알려진 갭) |
 | 대학 Theme (색상/이름/로고) | 여전히 `config/universities.js` (클라이언트) — 아래 이유 참고 |

@@ -63,6 +63,19 @@
       <version>${mybatis-spring-boot.version}</version>
     </dependency>
 
+    <!-- 이력서 첨삭(ResumeReviewService)의 텍스트 추출용 — PDF/DOCX만 지원한다.
+         HWP(한글과컴퓨터 독점 포맷)는 성숙한 오픈소스 파서가 없어 이번 단계에서 제외. -->
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>3.0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>5.3.0</version>
+    </dependency>
+
     <!-- Production target per the project spec. -->
     <dependency>
       <groupId>org.mariadb.jdbc</groupId>

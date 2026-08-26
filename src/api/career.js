@@ -1,7 +1,7 @@
 // One function per career-backend endpoint — see career-backend/README.md for
 // the full contract. userId travels via the JWT (see api/client.js), not as
 // a param here — only /api/auth/identify and the admin endpoints don't need one.
-import { apiGet, apiGetText, apiPost, apiPostStream, apiPut, apiDelete } from './client.js';
+import { apiGet, apiGetText, apiPost, apiPostForm, apiPostStream, apiPut, apiDelete } from './client.js';
 
 export const getUniversity = (code) => apiGet(`/api/career/university/${code}`);
 
@@ -43,6 +43,18 @@ export const creditInterviewVisit = () => apiPost('/api/career/skills/interview-
 
 export const reviewEssay = (payload) => apiPost('/api/career/essay/review', payload);
 export const getEssayHistory = (limit = 20) => apiGet(`/api/career/essay/history?limit=${limit}`);
+
+// 이력서 첨삭 — 파일 업로드라 나머지 target 필드도 FormData에 같이 담아 보낸다.
+// PDF/DOCX만 지원 (HWP는 career-backend ResumeReviewService가 명확히 거절).
+export const reviewResume = (file, target) => {
+  const form = new FormData();
+  form.append('file', file);
+  if (target?.targetType) form.append('targetType', target.targetType);
+  if (target?.targetLabel) form.append('targetLabel', target.targetLabel);
+  if (target?.targetContext) form.append('targetContext', target.targetContext);
+  return apiPostForm('/api/career/resume/review', form);
+};
+export const getResumeHistory = (limit = 20) => apiGet(`/api/career/resume/history?limit=${limit}`);
 
 // Raw XML passthrough — see career-backend's WorknetService for why.
 // `params` mirrors the legacy worknet controller's query shape

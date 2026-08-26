@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.careermate.backend.mapper.ResumeReviewMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO careermate_resume_review
+            (user_id, file_name, target_type, target_label, target_context,
+             overall_score, job_fit_score, summary, sections_json, excerpt_reviews_json,
+             missing_keywords_json, suggestions_json)
+        VALUES
+            (#{userId}, #{fileName}, #{targetType}, #{targetLabel}, #{targetContext},
+             #{overallScore}, #{jobFitScore}, #{summary}, #{sectionsJson}, #{excerptReviewsJson},
+             #{missingKeywordsJson}, #{suggestionsJson})
+    </insert>
+
+    <select id="findAllForUser" resultType="com.careermate.backend.domain.ResumeReviewRecord">
+        SELECT * FROM careermate_resume_review
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

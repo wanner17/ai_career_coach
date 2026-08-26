@@ -28,6 +28,9 @@ public class EssayReviewResponse {
 
     private int overallScore; // 0-100
     private String summary;
+    /** 지원 대상을 연동했을 때만 채워짐(null이면 대상 없이 첨삭한 것) — see SYSTEM_PROMPT. */
+    private Integer targetFitScore; // 0-100 또는 null
+    private String targetFitComment;
     private List<CategoryScore> categories;
     private List<String> suggestions;
     private String rewrittenExample;

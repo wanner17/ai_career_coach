@@ -20,6 +20,8 @@ public class EssayReviewHistoryItem {
     private String targetLabel;
     private int overallScore;
     private String summary;
+    private Integer targetFitScore;
+    private String targetFitComment;
     private List<EssayReviewResponse.CategoryScore> categories;
     private LocalDateTime createdAt;
 }

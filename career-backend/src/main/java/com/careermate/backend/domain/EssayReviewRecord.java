@@ -29,6 +29,8 @@ public class EssayReviewRecord {
     private String targetContext;
     private Integer overallScore;
     private String summary;
+    private Integer targetFitScore;
+    private String targetFitComment;
     private String categoriesJson;
     private String suggestionsJson;
     private String rewrittenExample;

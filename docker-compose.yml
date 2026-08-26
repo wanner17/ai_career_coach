@@ -22,6 +22,10 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
+      # 로컬 개발에서 MariaDB 설치 없이 바로 띄우고 싶으면 .env에
+      # SPRING_PROFILES_ACTIVE=h2 만 추가 — DB_* 값은 h2 프로필에서 전부 무시된다
+      # (application-h2.yml이 자체 인메모리 DB를 쓴다).
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       DB_HOST: ${DB_HOST:-host.docker.internal}
       DB_PORT: ${DB_PORT:-3306}
       DB_NAME: ${DB_NAME:-career_db}

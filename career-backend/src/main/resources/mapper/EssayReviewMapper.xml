@@ -5,10 +5,12 @@
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO careermate_essay_review
             (user_id, question, content, target_type, target_label, target_context,
-             overall_score, summary, categories_json, suggestions_json, rewritten_example)
+             overall_score, summary, target_fit_score, target_fit_comment,
+             categories_json, suggestions_json, rewritten_example)
         VALUES
             (#{userId}, #{question}, #{content}, #{targetType}, #{targetLabel}, #{targetContext},
-             #{overallScore}, #{summary}, #{categoriesJson}, #{suggestionsJson}, #{rewrittenExample})
+             #{overallScore}, #{summary}, #{targetFitScore}, #{targetFitComment},
+             #{categoriesJson}, #{suggestionsJson}, #{rewrittenExample})
     </insert>
 
     <select id="findAllForUser" resultType="com.careermate.backend.domain.EssayReviewRecord">

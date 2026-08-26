@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { key: 'growth', icon: '🌱', label: '나의 성장', path: '/growth', implemented: true },
   { key: 'ranking', icon: '🏆', label: '성장 랭킹', path: '/ranking', implemented: true },
   { key: 'interview', icon: '▻', label: 'AI 모의면접', path: '/interview', implemented: true },
-  { key: 'resume', icon: '✎', label: '자기소개서 첨삭', path: '/essay', implemented: true },
+  { key: 'resume', icon: '✎', label: '이력서·자소서 첨삭', path: '/essay', implemented: true },
   { key: 'company', icon: '⌕', label: '기업분석', path: '/company', implemented: true },
   { key: 'jobs', icon: '▤', label: '취업 공고', path: '/jobs', implemented: true },
   { key: 'mypage', icon: '♙', label: '마이페이지', path: '/mypage', implemented: true },

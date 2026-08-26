@@ -34,6 +34,15 @@ public class SchemaMigrationRunner implements ApplicationRunner {
         // account onboarding screen (see UserController#completeOnboarding); defaults to
         // FEMALE for any row created before this column existed.
         addColumnIfMissing("careermate_student_user", "avatar_gender", "VARCHAR(10) NOT NULL DEFAULT 'FEMALE'");
+        // 지원 대상(채용공고/기업) 연동 시 그 요구사항 대비 부합도 — 대상 없이 첨삭한
+        // 기존 행들은 둘 다 NULL(= "연동 안 함"과 동일하게 취급, 조회 시 구분됨).
+        addColumnIfMissing("careermate_essay_review", "target_fit_score", "INT NULL");
+        addColumnIfMissing("careermate_essay_review", "target_fit_comment", "TEXT NULL");
+        // 이력서 첨삭 v2 — 원문 발췌 첨삭(원문/문제/개선예시)이 새로 생기면서 추가된 컬럼.
+        // careermate_resume_review는 이번 세션에 막 생긴 테이블이라 대부분의 DB에선
+        // CREATE TABLE IF NOT EXISTS가 이미 이 컬럼까지 포함해서 만들었겠지만, 그 사이에
+        // 컬럼 없이 먼저 생성된 DB가 있을 수 있어 안전하게 둔다.
+        addColumnIfMissing("careermate_resume_review", "excerpt_reviews_json", "TEXT NULL");
         // onboarding_completed briefly lived here (a flag for "row exists but
         // student hasn't finished the onboarding screen yet") — dropped once
         // AuthService moved to never creating the row until 시작하기 is actually
@@ -51,11 +60,25 @@ public class SchemaMigrationRunner implements ApplicationRunner {
 
     private void addColumnIfMissing(String table, String column, String definition) {
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        // No table_schema filter, and UPPER() on both sides of what's left:
+        // `table_schema = DATABASE()` never matches on H2 at all — H2 stores the
+        // SCHEMA name there (e.g. "PUBLIC"), while DATABASE() returns the
+        // catalog/DB name ("CAREER_DB") — two different things that are never
+        // equal, so this predicate silently zeroed out every row regardless of
+        // case. That made every check report "missing" even when schema.sql's
+        // CREATE TABLE already had the column (harmless for a column ONLY ever
+        // added here, like topic/avatar_gender below, since re-adding a
+        // genuinely-missing column just works — but target_fit_score is also in
+        // schema.sql's CREATE TABLE now, so "missing" was a false positive and
+        // the re-ALTER collided with the column that was already there, crashing
+        // boot with "Duplicate column name"). This app only ever has one schema/
+        // catalog per connection, so dropping the filter entirely is safe on both
+        // MariaDB and H2.
         Integer count = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?",
+                "SELECT COUNT(*) FROM information_schema.columns WHERE UPPER(table_name) = UPPER(?) AND UPPER(column_name) = UPPER(?)",
                 Integer.class, table, column);
         if (count != null && count > 0) {
-            return; // already applied — e.g. a previous boot
+            return; // already applied — e.g. a previous boot, or schema.sql's CREATE TABLE already has it
         }
         log.info("Applying migration: ALTER TABLE {} ADD COLUMN {} {}", table, column, definition);
         jdbc.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition);

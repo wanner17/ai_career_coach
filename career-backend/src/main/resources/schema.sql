@@ -166,9 +166,33 @@ CREATE TABLE IF NOT EXISTS careermate_essay_review (
   target_context      TEXT,
   overall_score       INT           NOT NULL,
   summary             TEXT,
+  target_fit_score    INT,
+  target_fit_comment  TEXT,
   categories_json      TEXT         NOT NULL,
   suggestions_json     TEXT,
   rewritten_example   TEXT,
   created_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_careermate_essay_user FOREIGN KEY (user_id) REFERENCES careermate_student_user (id)
+);
+
+-- 이력서 첨삭(ResumeReviewService) — 원본 파일 자체는 저장하지 않고(민감 개인정보가
+-- 많이 담긴 문서라 굳이 남길 이유가 없음) 추출된 결과만 남긴다. sections_json/
+-- missing_keywords_json/suggestions_json은 careermate_essay_review와 같은 이유로
+-- 평문 JSON — ResumeReviewResponse와 같은 모양을 그대로 저장했다 다시 읽는다.
+CREATE TABLE IF NOT EXISTS careermate_resume_review (
+  id                     BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id                BIGINT        NOT NULL,
+  file_name              VARCHAR(255),
+  target_type            VARCHAR(20),
+  target_label           VARCHAR(255),
+  target_context         TEXT,
+  overall_score          INT           NOT NULL,
+  job_fit_score          INT,
+  summary                TEXT,
+  sections_json          TEXT          NOT NULL,
+  excerpt_reviews_json   TEXT,
+  missing_keywords_json  TEXT,
+  suggestions_json       TEXT,
+  created_at             TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_careermate_resume_user FOREIGN KEY (user_id) REFERENCES careermate_student_user (id)
 );

@@ -130,6 +130,37 @@ export async function apiPostStream(path, body, onEvent) {
   }
 }
 
+// Same auth/error handling as `request()`, but for a multipart file upload
+// (currently just 이력서 첨삭 — see api/career.js's reviewResume). Can't reuse
+// request() as-is: it hardcodes 'Content-Type: application/json' and
+// JSON.stringifies the body, neither of which works for a FormData upload —
+// the browser needs to set Content-Type itself (with the multipart boundary
+// fetch can't be handed manually).
+export async function apiPostForm(path, formData) {
+  const token = getToken();
+
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+  } catch {
+    throw new ApiError(0, '서버에 연결할 수 없습니다. career-backend가 실행 중인지 확인해주세요.');
+  }
+
+  if (res.status === 401) clearToken();
+
+  const isJson = res.headers.get('content-type')?.includes('application/json');
+  const body = isJson ? await res.json().catch(() => null) : null;
+
+  if (!res.ok) {
+    throw new ApiError(res.status, body?.message || `요청이 실패했습니다 (${res.status}).`);
+  }
+  return body;
+}
+
 // Same auth/base-URL handling as `request()`, but for endpoints that don't
 // return JSON (e.g. /api/career/worknet's raw XML passthrough — see
 // WorknetService) — `request()` would silently drop a non-JSON body to null.

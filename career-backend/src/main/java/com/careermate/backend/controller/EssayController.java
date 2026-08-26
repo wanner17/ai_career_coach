@@ -55,6 +55,8 @@ public class EssayController {
                 .targetLabel(record.getTargetLabel())
                 .overallScore(record.getOverallScore())
                 .summary(record.getSummary())
+                .targetFitScore(record.getTargetFitScore())
+                .targetFitComment(record.getTargetFitComment())
                 .categories(readCategories(record.getCategoriesJson()))
                 .createdAt(record.getCreatedAt())
                 .build();

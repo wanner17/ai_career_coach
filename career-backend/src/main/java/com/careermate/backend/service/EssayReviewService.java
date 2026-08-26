@@ -64,8 +64,29 @@ public class EssayReviewService {
             - 표현력: 문장이 간결하고 맞춤법/어법 오류가 없는가
             - 임팩트: 다른 지원자와 차별화되는 인상을 남기는가
 
-            지원 대상(채용공고 또는 기업 정보)이 함께 주어지면, 그 요구사항과
-            자소서 내용이 실제로 얼마나 부합하는지를 반드시 반영해 평가하세요.
+            지원 대상(채용공고 또는 기업 정보)이 함께 주어지면 반드시 targetFitScore(0~100)와
+            targetFitComment를 채우세요 — targetFitComment에는 그 공고/기업 정보에 실제로 적힌
+            구체적인 요구사항(직무, 자격요건, 우대사항 등)을 최소 1개 이상 그대로 인용하면서,
+            자소서 내용이 그것과 얼마나/어떻게 부합하거나 부족한지 명시하세요. "직무와 관련이
+            있다" 같은 두루뭉술한 문장은 안 됩니다 — 예: "공고의 'AWS 운영 경험 우대' 항목에
+            대응되는 내용이 자소서에 없습니다" 처럼 실제 근거를 대세요. 그리고 suggestions 중
+            최소 1개는 이 지원 대상의 요구사항을 직접 언급하는 제안이어야 합니다.
+            지원 대상이 주어지지 않으면 targetFitScore와 targetFitComment는 둘 다 null로 두세요
+            (임의로 만들어내지 마세요).
+
+            지원 대상 유무와 무관하게, 직무연관성 항목도 학생의 희망 직무를 기준으로 평가하세요.
+
+            점수는 절대 관대하게 주지 마세요. 실제 채용 담당자가 수백 명의 지원자 중 골라내야
+            하는 상황이라 생각하고 냉정하게 채점하세요. 다음 기준을 따르세요:
+            - 90~100점: 상위 5% 수준 — 구체적 성과와 수치, 명확한 논리, 흠잡을 데 없는 문장까지
+              전부 갖춘 경우에만. 웬만해서는 주지 마세요.
+            - 70~89점: 기본은 하지만 특별히 눈에 띄지 않음 — "무난한 자소서"는 대부분 여기.
+            - 50~69점: 눈에 띄는 약점(추상적 서술, 논리 비약, 오탈자 등)이 하나 이상 있음.
+            - 50점 미만: 이 상태로 제출하면 서류 탈락 가능성이 높음.
+            막연히 "성의 있게 썼으니 80점대"처럼 주지 말고, 실제로 위 기준에 해당하는 문제가
+            있으면 그 항목 점수를 과감하게 낮추고 comment에 정확히 어떤 문제인지 쓰세요.
+            5개 항목 점수가 전부 비슷하게 몰리는 것도 피하세요 — 항목마다 실제 완성도가 다르면
+            점수도 그만큼 벌어져야 합니다.
 
             각 항목마다 0~100점과 한두 문장 코멘트를 주고,
             전체 총평(summary), 개선 제안 목록(suggestions, 2~4개),
@@ -75,6 +96,8 @@ public class EssayReviewService {
             {
               "overallScore": 0-100 사이 정수,
               "summary": "전체 총평",
+              "targetFitScore": 0-100 사이 정수 또는 null,
+              "targetFitComment": "..." 또는 null,
               "categories": [
                 {"name": "구체성", "score": 0-100, "comment": "..."},
                 {"name": "직무연관성", "score": 0-100, "comment": "..."},
@@ -192,6 +215,8 @@ public class EssayReviewService {
                 .targetContext(request.getTargetContext())
                 .overallScore(parsed.getOverallScore())
                 .summary(parsed.getSummary())
+                .targetFitScore(parsed.getTargetFitScore())
+                .targetFitComment(parsed.getTargetFitComment())
                 .categoriesJson(categoriesJson)
                 .suggestionsJson(suggestionsJson)
                 .rewrittenExample(parsed.getRewrittenExample())
