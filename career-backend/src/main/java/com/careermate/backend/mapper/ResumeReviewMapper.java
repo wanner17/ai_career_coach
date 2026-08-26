@@ -13,4 +13,7 @@ public interface ResumeReviewMapper {
 
     /** Most recent first — see ResumeController#history. */
     List<ResumeReviewRecord> findAllForUser(@Param("userId") Long userId, @Param("limit") int limit);
+
+    /** Any review at all for this user — gates the "이력서 업데이트 하기" quest. See QuestService#requireVerified. */
+    boolean existsForUser(@Param("userId") Long userId);
 }

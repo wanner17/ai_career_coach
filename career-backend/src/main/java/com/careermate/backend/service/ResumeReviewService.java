@@ -20,9 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.careermate.backend.domain.Quest;
 import com.careermate.backend.domain.ResumeReviewRecord;
+import com.careermate.backend.dto.response.QuestCompleteResponse;
 import com.careermate.backend.dto.response.ResumeReviewResponse;
 import com.careermate.backend.exception.ExternalServiceException;
+import com.careermate.backend.mapper.QuestMapper;
 import com.careermate.backend.mapper.ResumeReviewMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,15 +42,18 @@ import lombok.extern.slf4j.Slf4j;
  * PDF/DOCX만 지원한다. HWP(한글과컴퓨터 독점 포맷)는 성숙한 오픈소스 파서가 없어
  * 이번 단계에서 제외 — 업로드하면 명확한 안내 메시지로 거절한다(원인을 삼키지 않음).
  *
- * 이번 단계에는 EXP/능력치 연동이 없다(EssayReviewService와 달리) — 학생이 이력서를
- * 몇 번을 올리든 자연스러운 일이라 자소서처럼 "퀘스트 1회성 완료"에 묶을 이유가
- * 약하다고 판단했다. 필요해지면 EssayReviewService#grantGrowth와 같은 패턴으로
- * 붙이면 된다.
+ * "이력서 업데이트 하기" 퀘스트를 여기서 직접 완료 처리한다 — EssayReviewService#
+ * grantGrowth와 같은 패턴. completeQuest() 자체가 이미 완료된 퀘스트엔 멱등이라
+ * 이력서를 몇 번을 다시 올려도 EXP가 중복 지급되진 않는다 — 능력치 연동은 없음
+ * (자소서 능력치처럼 매번 늘어나는 축이 이력서 쪽엔 아직 없어서).
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ResumeReviewService {
+
+    /** Must match data.sql's seed quest name exactly — see QuestMapper#findByName. */
+    private static final String RESUME_QUEST_NAME = "이력서 업데이트 하기";
 
     private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -159,6 +165,8 @@ public class ResumeReviewService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper;
     private final ResumeReviewMapper resumeReviewMapper;
+    private final QuestMapper questMapper;
+    private final QuestService questService;
 
     public ResumeReviewResponse review(Long userId, MultipartFile file, String targetType, String targetLabel, String targetContext) {
         if (apiKey == null || apiKey.isBlank()) {
@@ -225,12 +233,41 @@ public class ResumeReviewService {
         }
 
         persist(userId, file.getOriginalFilename(), targetType, targetLabel, targetContext, parsed);
+        parsed.setGrowth(grantQuestCompletion(userId));
         return parsed;
     }
 
     /** History for the frontend list — most recent first. */
     public List<ResumeReviewRecord> history(Long userId, int limit) {
         return resumeReviewMapper.findAllForUser(userId, limit);
+    }
+
+    /**
+     * Best-effort, same spirit as EssayReviewService#grantGrowth — a saved,
+     * graded review is still worth returning even if the quest tie-in breaks
+     * for some reason, so this never lets that failure fail the whole request
+     * (returns null growth instead). completeQuest() is idempotent (no-op if
+     * already completed), so re-running this on every subsequent resume
+     * upload is harmless.
+     */
+    private ResumeReviewResponse.ResumeGrowth grantQuestCompletion(Long userId) {
+        try {
+            Quest quest = questMapper.findByName(RESUME_QUEST_NAME);
+            if (quest == null) {
+                return null;
+            }
+            QuestCompleteResponse result = questService.completeQuest(userId, quest.getId());
+            return ResumeReviewResponse.ResumeGrowth.builder()
+                    .expGained(result.getExpGained())
+                    .alreadyCompleted(result.isAlreadyCompleted())
+                    .leveledUp(result.isLeveledUp())
+                    .fromLevel(result.getFromLevel())
+                    .toLevel(result.getToLevel())
+                    .build();
+        } catch (Exception e) {
+            log.warn("resume review quest tie-in failed for user {}", userId, e);
+            return null;
+        }
     }
 
     private void persist(Long userId, String fileName, String targetType, String targetLabel, String targetContext, ResumeReviewResponse parsed) {

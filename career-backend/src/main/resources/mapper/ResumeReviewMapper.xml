@@ -20,4 +20,10 @@
         LIMIT #{limit}
     </select>
 
+    <select id="existsForUser" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1 FROM careermate_resume_review WHERE user_id = #{userId}
+        )
+    </select>
+
 </mapper>

@@ -14,6 +14,7 @@ import com.careermate.backend.dto.response.UserResponse;
 import com.careermate.backend.exception.NotFoundException;
 import com.careermate.backend.mapper.EssayReviewMapper;
 import com.careermate.backend.mapper.QuestMapper;
+import com.careermate.backend.mapper.ResumeReviewMapper;
 import com.careermate.backend.mapper.SkillActivityLogMapper;
 import com.careermate.backend.mapper.UserMapper;
 import com.careermate.backend.util.CareerLevelCalculator;
@@ -35,6 +36,7 @@ public class QuestService {
     private final UserMapper userMapper;
     private final SkillActivityLogMapper skillActivityLogMapper;
     private final EssayReviewMapper essayReviewMapper;
+    private final ResumeReviewMapper resumeReviewMapper;
 
     public List<QuestResponse> getQuestsForUser(Long userId) {
         return questMapper.findAllForUser(userId).stream()
@@ -106,19 +108,19 @@ public class QuestService {
      * directly and grant themselves EXP for a quest with zero actual activity
      * behind it.
      *
-     * The remaining quests (이력서 업데이트 하기, 취업지원센터 프로그램 참여,
-     * 관심 직무 3개 선택하기, 진로심리검사 참여하기) have no in-app signal to
-     * check yet — either the feature itself doesn't exist (관심 직무 선택) or
-     * the activity happens outside this app entirely (오프라인 프로그램, 외부
-     * 검사) — those stay self-reported for now; verifying them needs either a
-     * new feature or an admin-approval flow, not a query against data we
-     * already have.
+     * The remaining quests (취업지원센터 프로그램 참여, 관심 직무 3개 선택하기,
+     * 진로심리검사 참여하기) have no in-app signal to check yet — either the
+     * feature itself doesn't exist (관심 직무 선택) or the activity happens
+     * outside this app entirely (오프라인 프로그램, 외부 검사) — those stay
+     * self-reported for now; verifying them needs either a new feature or an
+     * admin-approval flow, not a query against data we already have.
      */
     private void requireVerified(Long userId, String questName) {
         boolean verified = switch (questName) {
             case "기업분석 1회 완료" -> skillActivityLogMapper.existsForSkill(userId, SkillTarget.COMPANY_ANALYSIS.name());
             case "AI 모의면접 1회 완료" -> skillActivityLogMapper.existsForSkill(userId, SkillTarget.INTERVIEW.name());
             case "자기소개서 초안 작성" -> essayReviewMapper.existsForUser(userId);
+            case "이력서 업데이트 하기" -> resumeReviewMapper.existsForUser(userId);
             default -> true; // no verifiable signal for this quest yet — self-report stands
         };
         if (!verified) {
@@ -131,6 +133,7 @@ public class QuestService {
             case "기업분석 1회 완료" -> "먼저 기업분석에서 기업 상세 정보를 한 번 이상 조회해주세요.";
             case "AI 모의면접 1회 완료" -> "먼저 AI 모의면접 페이지를 한 번 이상 방문해주세요.";
             case "자기소개서 초안 작성" -> "먼저 자기소개서 첨삭을 한 번 이상 받아주세요.";
+            case "이력서 업데이트 하기" -> "먼저 이력서·자소서 첨삭에서 이력서를 한 번 이상 첨삭받아주세요.";
             default -> "아직 완료 조건을 충족하지 못했습니다.";
         };
     }

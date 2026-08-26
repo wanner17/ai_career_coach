@@ -40,6 +40,22 @@ public class ResumeReviewResponse {
     private List<MissingKeyword> missingKeywords; // 부족 키워드 — 중요도/근거/보완방법 포함
     private List<PriorityImprovement> priorityImprovements; // 우선순위별 개선 제안
 
+    /** "이력서 업데이트 하기" 퀘스트 완료 결과 — OpenAI는 절대 보내지 않고(ignoreUnknown이 이 방향을 커버), ResumeReviewService가 파싱 후 채운다. */
+    private ResumeGrowth growth;
+
+    /** EssayReviewResponse.EssayGrowth와 같은 모양 — Career Growth Loop 연동 결과, 프론트 토스트용. */
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ResumeGrowth {
+        private int expGained;
+        private boolean alreadyCompleted;
+        private boolean leveledUp;
+        private Integer fromLevel;
+        private Integer toLevel;
+    }
+
     @Getter
     @Builder
     @NoArgsConstructor

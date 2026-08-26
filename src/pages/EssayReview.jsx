@@ -418,6 +418,8 @@ function ResumeReviewPanel({ target }) {
     try {
       const res = await reviewResume(upload, target);
       setResult(res);
+      if (res.growth?.expGained > 0) pushToast(`🎯 이력서 첨삭 완료! +${res.growth.expGained} EXP`);
+      if (res.growth?.leveledUp) pushToast(`🎉 Lv.${res.growth.fromLevel} → Lv.${res.growth.toLevel}`);
       getResumeHistory().then(setHistory).catch(() => {});
     } catch (err) {
       setError(err instanceof ApiError ? err.message : '이력서 분석에 실패했습니다.');
