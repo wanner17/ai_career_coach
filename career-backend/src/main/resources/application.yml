@@ -26,10 +26,11 @@ spring:
       enabled: true
   servlet:
     multipart:
-      # 이력서 파일 업로드(ResumeController) 용 — Spring Boot 기본값(1MB)은 스캔된
-      # PDF 이력서 한 장도 넘기기 쉬워서 넉넉히 올려둔다.
-      max-file-size: 10MB
-      max-request-size: 10MB
+      # 이력서 파일 업로드(ResumeController)뿐 아니라 관리자의 AI 지식베이스 자료
+      # 업로드(AdminAiKnowledgeController → ACE)도 같이 쓴다 — 취업지원센터 PPT/PPTX
+      # 자료는 이력서보다 훨씬 커질 수 있어서 기존 10MB보다 넉넉히 올려둔다.
+      max-file-size: 25MB
+      max-request-size: 25MB
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml

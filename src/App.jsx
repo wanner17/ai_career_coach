@@ -18,6 +18,7 @@ import AdminQuest from './pages/admin/AdminQuest.jsx';
 import AdminProgram from './pages/admin/AdminProgram.jsx';
 import AdminStudents from './pages/admin/AdminStudents.jsx';
 import AdminBadge from './pages/admin/AdminBadge.jsx';
+import AdminAiKnowledge from './pages/admin/AdminAiKnowledge.jsx';
 import AdminStats from './pages/admin/AdminStats.jsx';
 import AdminSettings from './pages/admin/AdminSettings.jsx';
 
@@ -41,6 +42,7 @@ const ROUTES = {
   '/admin/programs': AdminProgram,
   '/admin/students': AdminStudents,
   '/admin/badges': AdminBadge,
+  '/admin/ai-knowledge': AdminAiKnowledge,
   '/admin/stats': AdminStats,
   '/admin/settings': AdminSettings,
 };

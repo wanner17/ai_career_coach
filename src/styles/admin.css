@@ -90,6 +90,20 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 13px; min
 .admin-settings__saved { margin: 4px 0 18px; padding: 12px 14px; background: #e5f7f0; color: #19a878; border-radius: 10px; font-size: 12.5px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .admin-settings__saved button { border: 1px solid #19a878; background: #fff; color: #19a878; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
 .admin-settings__actions { justify-content: flex-end; }
+
+/* AI 상담 지식베이스 — see AdminAiKnowledge.jsx. 드롭존 자체는 .resume-dropzone
+   (dashboard.css)을 그대로 재사용하고, 여기선 이 페이지에만 필요한 부분만 얹는다. */
+.ai-knowledge-upload-card { padding: 22px 24px; margin-bottom: 18px; }
+.ai-knowledge-upload-card h2 { margin: 0 0 14px; font-size: 15px; }
+.ai-knowledge-dropzone.is-busy { opacity: .6; pointer-events: none; }
+.ai-knowledge-dropzone small { color: var(--career-muted); font-size: 11px; }
+.ai-knowledge-text-toggle { margin-top: 14px; border: 0; background: none; padding: 0; color: var(--career-primary); font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.ai-knowledge-text-form { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.ai-knowledge-text-form textarea { width: 100%; border: 1px solid var(--career-line); border-radius: 10px; padding: 12px; font-size: 13px; line-height: 1.6; resize: vertical; }
+.ai-knowledge-text-form__row { display: flex; gap: 10px; }
+.ai-knowledge-text-form__row input { flex: 1; border: 1px solid var(--career-line); border-radius: 9px; padding: 9px 11px; font-size: 13px; }
+.ai-knowledge-list { margin-top: 4px; }
+.ai-knowledge-no-id { font-size: 11px; color: var(--career-muted); }
 .admin-settings__actions button { flex: none; padding: 11px 22px; }
 
 .admin-theme-preview { margin: 4px 0 18px; padding: 16px; border: 1px solid var(--career-line); border-radius: 12px; background: #faf9fe; }

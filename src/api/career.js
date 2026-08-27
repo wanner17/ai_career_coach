@@ -80,3 +80,16 @@ export const getAdminStats = () => apiGet('/api/admin/stats');
 export const getAdminDashboard = () => apiGet('/api/admin/dashboard');
 
 export const updateAdminUniversity = (code, payload) => apiPut(`/api/admin/universities/${code}`, payload);
+
+// AI 상담 지식베이스(ACE RAG) 관리 — AiChatService의 search_school_docs 도구가
+// 참고하는 취업지원센터 자료를 관리자가 등록/조회/삭제. ACE 연동 자체가 설정 안
+// 됐으면(getAiKnowledgeStatus().configured === false) 업로드 폼 대신 안내만 보여준다.
+export const getAiKnowledgeStatus = () => apiGet('/api/admin/ai-knowledge/status');
+export const getAiKnowledgeDocuments = (limit = 50) => apiGet(`/api/admin/ai-knowledge/documents?limit=${limit}`);
+export const uploadAiKnowledgeDocument = (file) => {
+  const form = new FormData();
+  form.append('file', file);
+  return apiPostForm('/api/admin/ai-knowledge/documents', form);
+};
+export const embedAiKnowledgeText = (payload) => apiPost('/api/admin/ai-knowledge/text', payload);
+export const deleteAiKnowledgeDocument = (sourceId) => apiDelete(`/api/admin/ai-knowledge/documents/${sourceId}`);

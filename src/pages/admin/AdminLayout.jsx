@@ -11,6 +11,7 @@ const NAV = [
   { key: 'quest', icon: '▣', label: 'Quest 관리', path: '/admin/quest' },
   { key: 'programs', icon: '▤', label: '프로그램 관리', path: '/admin/programs' },
   { key: 'badges', icon: '★', label: 'Badge 관리', path: '/admin/badges' },
+  { key: 'ai-knowledge', icon: '⚡', label: 'AI 상담 지식베이스', path: '/admin/ai-knowledge' },
   { key: 'stats', icon: '▥', label: '통계', path: '/admin/stats' },
   { key: 'settings', icon: '⚙', label: '설정', path: '/admin/settings' },
 ];
