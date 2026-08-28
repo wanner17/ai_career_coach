@@ -32,3 +32,27 @@ export async function scanAllNewsPostings() {
   const items = [first, ...rest].flatMap((p) => p?.items || []);
   return { items, scanned: items.length, scannedAll: pagesToFetch >= totalPages };
 }
+
+// Full-scan of 채용행사(EVENT) — 건수가 NEWS보다 훨씬 적어(행사는 상시가 아니라
+// 진행 중인 것만) 매번 전체를 훑어도 부담 없다. 지역(area/areaCd) 드롭다운은
+// 실제 코드표를 하드코딩하지 않고, 여기서 긁어온 항목들에 실제로 등장하는
+// areaCd만 옵션으로 만든다(Jobs.jsx) — 잘못된 코드로 조용히 0건 나오는 일 방지.
+const MAX_EVENT_PAGES = 30;
+
+export async function scanAllEvents() {
+  const firstXml = await getWorknetXml({ type: 'EVENT', callTp: 'L', startPage: 1 });
+  const first = parseWorknetList(firstXml, 'EVENT');
+  if (!first) return { items: [], scanned: 0, scannedAll: true };
+
+  const totalPages = Math.ceil(first.total / 10);
+  const pagesToFetch = Math.min(totalPages, MAX_EVENT_PAGES);
+
+  const rest = await Promise.all(
+    Array.from({ length: pagesToFetch - 1 }, (_, i) =>
+      getWorknetXml({ type: 'EVENT', callTp: 'L', startPage: i + 2 }).then((xml) => parseWorknetList(xml, 'EVENT'))
+    )
+  );
+
+  const items = [first, ...rest].flatMap((p) => p?.items || []);
+  return { items, scanned: items.length, scannedAll: pagesToFetch >= totalPages };
+}

@@ -13,6 +13,7 @@ import MyPage from './pages/MyPage.jsx';
 import GrowthPage from './pages/GrowthPage.jsx';
 import RankingPage from './pages/RankingPage.jsx';
 import SkillDetailPage from './pages/SkillDetailPage.jsx';
+import CareerRoadmapPage from './pages/CareerRoadmapPage.jsx';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminQuest from './pages/admin/AdminQuest.jsx';
 import AdminProgram from './pages/admin/AdminProgram.jsx';
@@ -37,6 +38,7 @@ const ROUTES = {
   '/essay': EssayReview,
   '/mypage': MyPage,
   '/skills': SkillDetailPage,
+  '/career-roadmap': CareerRoadmapPage,
   '/admin': AdminDashboard,
   '/admin/quest': AdminQuest,
   '/admin/programs': AdminProgram,
@@ -87,7 +89,7 @@ function usePathname() {
 // only the student-facing pages need that (and its loading/error gate).
 // Admin has its own independent data fetching (see AdminQuest.jsx) and
 // shouldn't wait on, or fail because of, the student dashboard call.
-const STUDENT_PATHS = new Set(['/', '/quest', '/ai-chat', '/interview', '/growth', '/ranking', '/jobs', '/company', '/essay', '/mypage', '/skills']);
+const STUDENT_PATHS = new Set(['/', '/quest', '/ai-chat', '/interview', '/growth', '/ranking', '/jobs', '/company', '/essay', '/mypage', '/skills', '/career-roadmap']);
 
 export default function App() {
   const [pathname, navigate] = usePathname();

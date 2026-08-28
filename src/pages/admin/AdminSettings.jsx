@@ -15,6 +15,7 @@ export default function AdminSettings({ navigate }) {
   const [name, setName] = useState(theme.name);
   const [logo, setLogo] = useState(theme.logo || '');
   const [primaryColor, setPrimaryColor] = useState(theme.primaryColor);
+  const [careerRoadmapUrl, setCareerRoadmapUrl] = useState(theme.careerRoadmapUrl || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
@@ -25,6 +26,7 @@ export default function AdminSettings({ navigate }) {
     setName(theme.name);
     setLogo(theme.logo || '');
     setPrimaryColor(theme.primaryColor);
+    setCareerRoadmapUrl(theme.careerRoadmapUrl || '');
   }, [theme]);
 
   const validHex = isValidHex(primaryColor);
@@ -37,14 +39,19 @@ export default function AdminSettings({ navigate }) {
     setError(null);
     setSaved(false);
     try {
-      await api.updateAdminUniversity(theme.code, { name: name.trim(), logo: logo.trim(), ...derived });
+      await api.updateAdminUniversity(theme.code, {
+        name: name.trim(),
+        logo: logo.trim(),
+        careerRoadmapUrl: careerRoadmapUrl.trim(),
+        ...derived,
+      });
       setSaved(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : '저장에 실패했습니다.');
     } finally {
       setSaving(false);
     }
-  }, [name, logo, derived, validHex, saving, theme.code]);
+  }, [name, logo, careerRoadmapUrl, derived, validHex, saving, theme.code]);
 
   return (
     <AdminLayout active="settings" navigate={navigate}>
@@ -65,6 +72,16 @@ export default function AdminSettings({ navigate }) {
             <div className="full">
               <label>로고 URL <span className="admin-settings__hint">(비워두면 기본 아이콘으로 표시)</span></label>
               <input value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="/assets/logo/sample.png" />
+            </div>
+            <div className="full">
+              <label>커리어로드맵 메뉴 URL <span className="admin-settings__hint">(비워두면 마이페이지 아래 메뉴 자체가 숨겨짐)</span></label>
+              <input
+                type="url"
+                value={careerRoadmapUrl}
+                onChange={(e) => setCareerRoadmapUrl(e.target.value)}
+                placeholder="https://univ.ac.kr/career-roadmap"
+              />
+              <p className="admin-settings__hint admin-settings__hint--block">대학 홈페이지 자체의 커리어로드맵 페이지 주소입니다. 학생 화면의 사이드바 틀 안에 그대로 표시됩니다(해당 페이지가 iframe 삽입을 막아둔 경우 표시되지 않을 수 있습니다).</p>
             </div>
             <div className="full">
               <label>기본 색상</label>

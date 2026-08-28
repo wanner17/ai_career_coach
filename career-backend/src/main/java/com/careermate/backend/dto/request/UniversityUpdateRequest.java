@@ -35,4 +35,7 @@ public class UniversityUpdateRequest {
 
     /** Optional — an empty/blank value falls back to BrandLogo.jsx's icon, same as an unset one. */
     private String logo;
+
+    /** Optional — 마이페이지 아래 "커리어로드맵" 메뉴 링크. 비우면 그 메뉴가 사라진다(Sidebar.jsx). */
+    private String careerRoadmapUrl;
 }

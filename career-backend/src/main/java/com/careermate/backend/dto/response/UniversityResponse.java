@@ -22,6 +22,7 @@ public class UniversityResponse {
     private String primaryColor2;
     private String primaryColorShadow;
     private String logo;
+    private String careerRoadmapUrl;
 
     public static UniversityResponse from(University u) {
         return UniversityResponse.builder()
@@ -34,6 +35,7 @@ public class UniversityResponse {
                 .primaryColor2(u.getPrimaryColor2())
                 .primaryColorShadow(u.getPrimaryColorShadow())
                 .logo(u.getLogoUrl())
+                .careerRoadmapUrl(u.getCareerRoadmapUrl())
                 .build();
     }
 }

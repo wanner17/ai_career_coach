@@ -36,6 +36,8 @@ public class UniversityService {
                 .primaryColor2(request.getPrimaryColor2())
                 .primaryColorShadow(request.getPrimaryColorShadow())
                 .logoUrl(request.getLogo() == null || request.getLogo().isBlank() ? null : request.getLogo())
+                .careerRoadmapUrl(request.getCareerRoadmapUrl() == null || request.getCareerRoadmapUrl().isBlank()
+                        ? null : request.getCareerRoadmapUrl())
                 .build();
         universityMapper.update(university);
         return getUniversity(code);

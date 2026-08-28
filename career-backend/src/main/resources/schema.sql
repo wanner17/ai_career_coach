@@ -16,7 +16,12 @@ CREATE TABLE IF NOT EXISTS careermate_university (
   primary_color_soft    VARCHAR(20)   NOT NULL,
   primary_color2        VARCHAR(20)   NOT NULL,
   primary_color_shadow  VARCHAR(40)   NOT NULL,
-  logo_url              VARCHAR(255)
+  logo_url              VARCHAR(255),
+  -- 마이페이지 아래 "커리어로드맵" 메뉴가 가리킬 외부 URL. 이 서비스 화면이 아니라
+  -- 이 위젯을 심은 대학 홈페이지 자체의 메뉴(페이지)로 새 탭에서 이동한다 —
+  -- 대학마다 그 페이지 주소가 다르므로 학교별로 설정. NULL/빈 값이면 Sidebar가
+  -- 이 메뉴 자체를 숨긴다(AdminSettings에서 등록 전 기본 상태).
+  career_roadmap_url    VARCHAR(500)
 );
 
 -- No password/login form — the host university page already authenticated

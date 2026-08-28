@@ -12,6 +12,9 @@ export const universities = {
     primaryColorShadow: 'rgba(112, 83, 246, .24)',
     // intentionally missing file — exercises the Sidebar/AdminLayout <img onError> fallback path
     logo: '/assets/logo/sample.png',
+    // 비워두면 Sidebar가 "커리어로드맵" 메뉴 자체를 숨긴다 — 대학 홈페이지 쪽 실제
+    // 메뉴 URL이 정해지면 AdminSettings에서 채워 넣는다(DB의 career_roadmap_url).
+    careerRoadmapUrl: '',
   },
   UNIVERSITY_B: {
     code: 'UNIVERSITY_B',

@@ -12,6 +12,7 @@
         <result property="primaryColor2" column="primary_color2"/>
         <result property="primaryColorShadow" column="primary_color_shadow"/>
         <result property="logoUrl" column="logo_url"/>
+        <result property="careerRoadmapUrl" column="career_roadmap_url"/>
     </resultMap>
 
     <select id="findByCode" resultMap="UniversityMap">
@@ -22,7 +23,8 @@
         UPDATE careermate_university
         SET name = #{name}, primary_color = #{primaryColor}, primary_color_hover = #{primaryColorHover},
             primary_color_light = #{primaryColorLight}, primary_color_soft = #{primaryColorSoft},
-            primary_color2 = #{primaryColor2}, primary_color_shadow = #{primaryColorShadow}, logo_url = #{logoUrl}
+            primary_color2 = #{primaryColor2}, primary_color_shadow = #{primaryColorShadow}, logo_url = #{logoUrl},
+            career_roadmap_url = #{careerRoadmapUrl}
         WHERE code = #{code}
     </update>
 

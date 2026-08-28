@@ -568,6 +568,24 @@ function ResumeReviewPanel({ target, historyOpen, onCloseHistory }) {
 
   const displayName = file?.name || (writing ? '직접 작성한 이력서' : null);
 
+  // 파일 선택/작성 취소 — 드롭존을 빈 상태로 되돌림. input의 value도 비워야
+  // 같은 파일을 다시 골라도 onChange가 다시 뜬다(브라우저가 "같은 파일"이면
+  // change 이벤트를 안 쏘는 문제 방지).
+  const removeFile = () => {
+    setFile(null);
+    setResumeText('');
+    setWriting(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // 분석 결과까지 나온 뒤 "삭제하고 다시 올리기" — 업로드 화면으로 완전히 되돌림.
+  const removeUpload = () => {
+    removeFile();
+    setResult(null);
+    setAnalyzedAt(null);
+    setError(null);
+  };
+
   const handleSubmit = async () => {
     const upload = writing
       ? (resumeText.trim() ? new File([resumeText], 'resume.txt', { type: 'text/plain' }) : null)
@@ -619,9 +637,14 @@ function ResumeReviewPanel({ target, historyOpen, onCloseHistory }) {
                     <p>PDF, DOCX 파일을 지원합니다.</p>
                   </>
                 )}
-                <button type="button" className="resume-dropzone__btn" onClick={pickFile}>
-                  {displayName ? '다른 파일 선택' : '파일 선택'}
-                </button>
+                <div className="resume-dropzone__actions">
+                  <button type="button" className="resume-dropzone__btn" onClick={pickFile}>
+                    {displayName ? '다른 파일 선택' : '파일 선택'}
+                  </button>
+                  {file && (
+                    <button type="button" className="resume-dropzone__remove" onClick={removeFile}>✕ 삭제</button>
+                  )}
+                </div>
               </div>
             )}
 
@@ -677,6 +700,7 @@ function ResumeReviewPanel({ target, historyOpen, onCloseHistory }) {
             <button className="essay-submit-btn resume-text-bar__analyze" onClick={reanalyze} disabled={loading}>
               {loading ? '분석 중...' : '✨ AI 이력서 분석하기'}
             </button>
+            <button type="button" className="resume-text-bar__remove" onClick={removeUpload} disabled={loading}>🗑 삭제</button>
             {analyzedAt && (
               <span className="resume-text-bar__meta">
                 ✓ 분석 완료 · {analyzedAt.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
@@ -761,13 +785,81 @@ function ResumeReviewPanel({ target, historyOpen, onCloseHistory }) {
   );
 }
 
+// 자소서 첨삭 결과 한 건 — 여러 문항 올릴 때 문항마다 이 몸통을 반복해서 씀.
+function EssayResultBody({ result }) {
+  return (
+    <>
+      <div className="essay-score">
+        <div className="essay-score__ring" style={{ '--pct': result.overallScore }}>
+          <strong>{result.overallScore}</strong>
+          <span>/ 100</span>
+        </div>
+        <p className="essay-summary">{result.summary}</p>
+      </div>
+
+      {result.targetFitScore != null && (
+        <>
+          <div className="target-fit-meter">
+            <span>🎯 지원 대상 적합도</span>
+            <div className="progress"><i style={{ width: `${result.targetFitScore}%` }} /></div>
+            <b>{result.targetFitScore}점</b>
+          </div>
+          {result.targetFitComment && <p className="target-fit-comment">{result.targetFitComment}</p>}
+        </>
+      )}
+
+      <GrowthBanner growth={result.growth} />
+
+      <div className="divider" />
+
+      <h3 className="job-detail__section">항목별 평가</h3>
+      <div className="skills">
+        {result.categories?.map((c) => (
+          <div className="skill" key={c.name}>
+            <div className="icon purple">{CATEGORY_ICONS[c.name] || '•'}</div>
+            <div className="skill-name">{c.name}</div>
+            <div className="bar"><span style={{ width: `${c.score}%` }} /></div>
+            <div className="score">{c.score}</div>
+          </div>
+        ))}
+      </div>
+      {result.categories?.some((c) => c.comment) && (
+        <ul className="essay-category-comments">
+          {result.categories.map((c) => c.comment && <li key={c.name}><b>{c.name}</b> — {c.comment}</li>)}
+        </ul>
+      )}
+
+      {result.suggestions?.length > 0 && (
+        <>
+          <h3 className="job-detail__section">개선 제안</h3>
+          <ul className="essay-suggestions">
+            {result.suggestions.map((s, i) => <li key={i}>{s}</li>)}
+          </ul>
+        </>
+      )}
+
+      {result.rewrittenExample && (
+        <>
+          <h3 className="job-detail__section">고쳐 쓴 예시</h3>
+          <div className="job-detail__sub essay-rewrite">{result.rewrittenExample}</div>
+        </>
+      )}
+    </>
+  );
+}
+
+let essayEntrySeq = 1;
+const newEssayEntry = () => ({ id: essayEntrySeq++, question: '', content: '' });
+
 export default function EssayReview({ navigate }) {
   const { pushToast } = useCareer();
   const [activeTab, setActiveTab] = useState('ESSAY'); // ESSAY | RESUME
-  const [question, setQuestion] = useState('');
-  const [content, setContent] = useState('');
+  // 자소서는 문항이 보통 여러 개(지원동기/성장과정/입사후포부 등)라 한 번에
+  // 여러 개 올려서 각각 첨삭받게 함 — entries 배열, id는 순증 카운터(삭제해도
+  // key 겹칠 일 없게 index 대신 씀).
+  const [entries, setEntries] = useState([newEssayEntry()]);
   const [target, setTarget] = useState(null);
-  const [result, setResult] = useState(null);
+  const [results, setResults] = useState(null); // entries와 같은 순서의 결과 배열
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [history, setHistory] = useState(null);
@@ -784,16 +876,33 @@ export default function EssayReview({ navigate }) {
 
   useEffect(() => { loadHistory(); }, []);
 
+  const addEntry = () => setEntries((prev) => [...prev, newEssayEntry()]);
+  const removeEntry = (id) => setEntries((prev) => (prev.length > 1 ? prev.filter((e) => e.id !== id) : prev));
+  const updateEntry = (id, key, value) =>
+    setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, [key]: value } : e)));
+
   const handleSubmit = async () => {
-    if (!content.trim()) return;
+    const filled = entries.filter((e) => e.content.trim());
+    if (filled.length === 0) return;
     setLoading(true);
     setError(null);
-    setResult(null);
+    setResults(null);
     try {
-      const payload = { question: question.trim(), content: content.trim(), ...target };
-      const res = await reviewEssay(payload);
-      setResult(res);
-      if (res.growth?.expGained > 0) pushToast(`🎯 자기소개서 첨삭 완료! +${res.growth.expGained} EXP`);
+      // 순차 처리 — OpenAI 호출을 한 번에 N개 동시로 쏘지 않고 하나씩, 문항이
+      // 많아도 백엔드/API 쪽에 부담 없게. 실패한 문항이 있어도 나머지는 계속.
+      const out = [];
+      let totalExp = 0;
+      for (const entry of filled) {
+        try {
+          const res = await reviewEssay({ question: entry.question.trim(), content: entry.content.trim(), ...target });
+          out.push({ id: entry.id, question: entry.question.trim(), result: res });
+          if (res.growth?.expGained > 0) totalExp += res.growth.expGained;
+        } catch (err) {
+          out.push({ id: entry.id, question: entry.question.trim(), error: err instanceof ApiError ? err.message : '첨삭 요청에 실패했습니다.' });
+        }
+      }
+      setResults(out);
+      if (totalExp > 0) pushToast(`🎯 자기소개서 첨삭 완료! +${totalExp} EXP`);
       loadHistory();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : '첨삭 요청에 실패했습니다.');
@@ -833,27 +942,40 @@ export default function EssayReview({ navigate }) {
         {activeTab === 'ESSAY' ? (
           <>
             <article className="card essay-form-card">
-              <div className="essay-field">
-                <label htmlFor="essay-question">자소서 문항 <span className="essay-field__optional">(선택)</span></label>
-                <input
-                  id="essay-question"
-                  placeholder="예: 지원 동기를 작성해주세요"
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                />
-              </div>
-              <div className="essay-field">
-                <label htmlFor="essay-content">자소서 본문</label>
-                <textarea
-                  id="essay-content"
-                  rows={10}
-                  placeholder="첨삭받고 싶은 자기소개서를 붙여넣어주세요."
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                />
-              </div>
-              <button className="essay-submit-btn" onClick={handleSubmit} disabled={loading || !content.trim()}>
-                {loading ? '첨삭 중...' : '✨ AI 첨삭 받기'}
+              {entries.map((entry, i) => (
+                <div className="essay-entry" key={entry.id}>
+                  {entries.length > 1 && (
+                    <div className="essay-entry__head">
+                      <b>문항 {i + 1}</b>
+                      <button type="button" className="essay-entry__remove" onClick={() => removeEntry(entry.id)}>✕ 삭제</button>
+                    </div>
+                  )}
+                  <div className="essay-field">
+                    <label htmlFor={`essay-question-${entry.id}`}>자기소개서 질문 <span className="essay-field__optional">(선택)</span></label>
+                    <input
+                      id={`essay-question-${entry.id}`}
+                      placeholder="예: 지원 동기를 작성해주세요"
+                      value={entry.question}
+                      onChange={(e) => updateEntry(entry.id, 'question', e.target.value)}
+                    />
+                  </div>
+                  <div className="essay-field">
+                    <label htmlFor={`essay-content-${entry.id}`}>자기소개서 내용</label>
+                    <textarea
+                      id={`essay-content-${entry.id}`}
+                      rows={10}
+                      placeholder="첨삭받고 싶은 자기소개서를 붙여넣어주세요."
+                      value={entry.content}
+                      onChange={(e) => updateEntry(entry.id, 'content', e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
+
+              <button type="button" className="essay-add-entry-btn" onClick={addEntry}>+ 문항 추가</button>
+
+              <button className="essay-submit-btn" onClick={handleSubmit} disabled={loading || entries.every((e) => !e.content.trim())}>
+                {loading ? '첨삭 중...' : `✨ AI 첨삭 받기 (${entries.filter((e) => e.content.trim()).length}건)`}
               </button>
               {error && <p className="essay-error">{error}</p>}
             </article>
@@ -872,65 +994,18 @@ export default function EssayReview({ navigate }) {
         )}
       </div>
 
-      {activeTab === 'ESSAY' && result && (
-        <article className="card essay-result-card">
-          <div className="essay-score">
-            <div className="essay-score__ring" style={{ '--pct': result.overallScore }}>
-              <strong>{result.overallScore}</strong>
-              <span>/ 100</span>
-            </div>
-            <p className="essay-summary">{result.summary}</p>
-          </div>
-
-          {result.targetFitScore != null && (
-            <>
-              <div className="target-fit-meter">
-                <span>🎯 지원 대상 적합도</span>
-                <div className="progress"><i style={{ width: `${result.targetFitScore}%` }} /></div>
-                <b>{result.targetFitScore}점</b>
-              </div>
-              {result.targetFitComment && <p className="target-fit-comment">{result.targetFitComment}</p>}
-            </>
+      {activeTab === 'ESSAY' && results?.map((r, i) => (
+        <article className="card essay-result-card" key={r.id}>
+          {results.length > 1 && (
+            <h3 className="essay-result-card__label">문항 {i + 1}{r.question ? ` — ${r.question}` : ''}</h3>
           )}
-
-          <GrowthBanner growth={result.growth} />
-
-          <div className="divider" />
-
-          <h3 className="job-detail__section">항목별 평가</h3>
-          <div className="skills">
-            {result.categories?.map((c) => (
-              <div className="skill" key={c.name}>
-                <div className="icon purple">{CATEGORY_ICONS[c.name] || '•'}</div>
-                <div className="skill-name">{c.name}</div>
-                <div className="bar"><span style={{ width: `${c.score}%` }} /></div>
-                <div className="score">{c.score}</div>
-              </div>
-            ))}
-          </div>
-          {result.categories?.some((c) => c.comment) && (
-            <ul className="essay-category-comments">
-              {result.categories.map((c) => c.comment && <li key={c.name}><b>{c.name}</b> — {c.comment}</li>)}
-            </ul>
-          )}
-
-          {result.suggestions?.length > 0 && (
-            <>
-              <h3 className="job-detail__section">개선 제안</h3>
-              <ul className="essay-suggestions">
-                {result.suggestions.map((s, i) => <li key={i}>{s}</li>)}
-              </ul>
-            </>
-          )}
-
-          {result.rewrittenExample && (
-            <>
-              <h3 className="job-detail__section">고쳐 쓴 예시</h3>
-              <div className="job-detail__sub essay-rewrite">{result.rewrittenExample}</div>
-            </>
+          {r.error ? (
+            <p className="essay-error">{r.error}</p>
+          ) : (
+            <EssayResultBody result={r.result} />
           )}
         </article>
-      )}
+      ))}
 
       {activeTab === 'ESSAY' && <HistorySection historyRef={historyRef} history={history} />}
     </AppShell>

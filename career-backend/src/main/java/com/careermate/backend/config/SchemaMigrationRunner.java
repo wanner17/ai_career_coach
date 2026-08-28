@@ -43,6 +43,9 @@ public class SchemaMigrationRunner implements ApplicationRunner {
         // CREATE TABLE IF NOT EXISTS가 이미 이 컬럼까지 포함해서 만들었겠지만, 그 사이에
         // 컬럼 없이 먼저 생성된 DB가 있을 수 있어 안전하게 둔다.
         addColumnIfMissing("careermate_resume_review", "excerpt_reviews_json", "TEXT NULL");
+        // 마이페이지 아래 "커리어로드맵" 메뉴가 가리킬 대학별 외부 URL — schema.sql의
+        // CREATE TABLE엔 이미 있지만, 이 컬럼이 생기기 전에 먼저 만들어진 DB를 위해.
+        addColumnIfMissing("careermate_university", "career_roadmap_url", "VARCHAR(500) NULL");
         // onboarding_completed briefly lived here (a flag for "row exists but
         // student hasn't finished the onboarding screen yet") — dropped once
         // AuthService moved to never creating the row until 시작하기 is actually

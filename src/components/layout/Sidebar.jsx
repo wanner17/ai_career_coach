@@ -58,6 +58,20 @@ export default function Sidebar({ activePath, navigate, isOpen, onClose }) {
               <span>{item.icon}</span>{item.label}
             </button>
           ))}
+          {/* 마이페이지 바로 아래 — 대학 홈페이지 자체의 페이지지만, 새 탭으로 빼지
+              않고 CareerRoadmapPage.jsx가 우리 틀(사이드바/헤더) 안에 iframe으로
+              끌어와서 보여준다(InterviewPage.jsx와 같은 패턴). 그래서 다른 메뉴와
+              똑같이 내부 라우트로 navigate — URL 자체가 없으면(theme.careerRoadmapUrl
+              미설정) 그 페이지에서 안내 카드를 보여준다. */}
+          {theme.careerRoadmapUrl && (
+            <button
+              className={`career-nav__item ${activePath === '/career-roadmap' ? 'is-active' : ''}`}
+              onClick={() => handleNavClick({ path: '/career-roadmap', implemented: true })}
+              aria-current={activePath === '/career-roadmap' ? 'page' : undefined}
+            >
+              <span>🧭</span>커리어로드맵
+            </button>
+          )}
         </nav>
 
         <div className="weekly-quest">

@@ -87,6 +87,7 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 13px; min
 .admin-color-picker input[type="color"] { width: 44px; height: 40px; padding: 2px; border: 1px solid var(--career-line); border-radius: 9px; background: #fff; cursor: pointer; }
 .admin-color-picker input:not([type="color"]) { flex: 1; }
 .admin-settings__error { margin: 6px 0 0; font-size: 12px; color: #e6534a; }
+.admin-settings__hint--block { display: block; margin: 6px 0 0; font-size: 12px; }
 .admin-settings__saved { margin: 4px 0 18px; padding: 12px 14px; background: #e5f7f0; color: #19a878; border-radius: 10px; font-size: 12.5px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .admin-settings__saved button { border: 1px solid #19a878; background: #fff; color: #19a878; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
 .admin-settings__actions { justify-content: flex-end; }

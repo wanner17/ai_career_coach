@@ -246,6 +246,14 @@
 .external-frame { height: 74vh; min-height: 560px; border: 1px solid var(--career-line); border-radius: 14px; box-shadow: var(--career-shadow); overflow: hidden; margin-top: 4px; }
 .external-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
 
+/* 커리어로드맵 — see CareerRoadmapPage.jsx. "새 창에서 열기"는 대상 페이지가
+   X-Frame-Options 등으로 프레이밍 자체를 막아둔 경우의 우회 수단이라 항상 보여준다. */
+.roadmap-frame-toolbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.roadmap-frame-toolbar a { font-size: 12.5px; font-weight: 700; color: var(--career-primary); }
+.roadmap-empty-card { padding: 40px 24px; text-align: center; color: var(--career-muted); }
+.roadmap-empty-card p { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--career-text); }
+.roadmap-empty-card small { font-size: 12.5px; }
+
 .ai-panel { background: #fff; border-left: 1px solid var(--career-line); height: 100vh; height: 100dvh; position: sticky; top: 0; display: flex; flex-direction: column; }
 .ai-panel__head { min-height: 70px; padding: 0 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--career-line); }
 .ai-panel__head h2 { font-size: 16px; } .ai-panel__head a { font-size: 11px; color: var(--career-primary); }
@@ -468,6 +476,17 @@
 .essay-submit-btn:disabled { opacity: .5; cursor: not-allowed; }
 .essay-error { margin: 12px 0 0; color: #e6534a; font-size: 13px; }
 
+/* 자소서 여러 문항 — 문항마다 essay-entry 하나씩, 위쪽에 구분선 + 삭제 버튼. */
+.essay-entry { padding-top: 16px; margin-top: 16px; border-top: 1px dashed var(--career-line); }
+.essay-entry:first-child { padding-top: 0; margin-top: 0; border-top: 0; }
+.essay-entry__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.essay-entry__head b { font-size: 13px; }
+.essay-entry__remove { border: 0; background: none; color: var(--career-muted); font-size: 12px; padding: 0; }
+.essay-entry__remove:hover { color: #e6534a; }
+.essay-add-entry-btn { width: 100%; border: 1px dashed var(--career-line); background: none; border-radius: 10px; padding: 10px; font-size: 12.5px; font-weight: 700; color: var(--career-primary); margin-bottom: 14px; }
+.essay-add-entry-btn:hover { background: var(--career-primary-light); }
+.essay-result-card__label { margin: 0 0 14px; font-size: 14px; }
+
 .essay-result-card { padding: 24px; }
 .essay-score { display: flex; align-items: center; gap: 20px; margin-bottom: 4px; }
 .essay-score__ring {
@@ -559,7 +578,9 @@
 .resume-dropzone__icon { font-size: 30px; }
 .resume-dropzone strong { font-size: 14px; }
 .resume-dropzone p { margin: 0; font-size: 12px; color: var(--career-muted); }
-.resume-dropzone__btn { margin-top: 8px; border: 1px solid var(--career-primary); background: #fff; color: var(--career-primary); border-radius: 8px; padding: 8px 16px; font-size: 12.5px; font-weight: 700; }
+.resume-dropzone__btn { border: 1px solid var(--career-primary); background: #fff; color: var(--career-primary); border-radius: 8px; padding: 8px 16px; font-size: 12.5px; font-weight: 700; }
+.resume-dropzone__actions { margin-top: 8px; display: flex; gap: 8px; }
+.resume-dropzone__remove { border: 1px solid var(--career-line); background: #fff; color: #e6534a; border-radius: 8px; padding: 8px 14px; font-size: 12.5px; font-weight: 700; }
 .resume-upload-divider { display: flex; align-items: center; gap: 10px; color: var(--career-muted); font-size: 11.5px; }
 .resume-upload-divider::before, .resume-upload-divider::after { content: ''; flex: 1; height: 1px; background: var(--career-line); }
 .resume-write-btn { border: 1px solid var(--career-line); background: #fff; border-radius: 10px; padding: 12px; font-size: 13px; font-weight: 700; color: var(--career-text); }
@@ -617,6 +638,7 @@
 .resume-text-bar__link { border: 1px solid var(--career-line); background: #fff; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--career-primary); white-space: nowrap; }
 .resume-text-bar__analyze { white-space: nowrap; padding: 10px 18px; }
 .resume-text-bar__meta { flex-basis: 100%; font-size: 11.5px; color: var(--career-muted); }
+.resume-text-bar__remove { border: 1px solid var(--career-line); background: #fff; color: #e6534a; border-radius: 8px; padding: 10px 16px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
 
 .resume-fulltext-modal { max-width: 640px; width: 100%; max-height: 80vh; overflow-y: auto; text-align: left; }
 .resume-fulltext-modal h3 { margin: 0 0 12px; font-size: 15px; }
